@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="GeometricFields.cpp" />
+    <ClCompile Include="Utils\ComputeProgramWrapper.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\RenderProgram.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\RenderProgram2D.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Render3D\RenderProgram3D.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Render3D\RenderProgram3DG1.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Render3D\RenderProgram3DG2.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeometricFields.h" />
+    <ClInclude Include="Utils\ComputeProgramWrapper.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\RenderProgram.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\RenderProgram2D.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render3D\RenderProgram3D.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render3D\RenderProgram3DG1.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render3D\RenderProgram3DG2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{3947983e-3337-4f6b-86a7-b78fb65a2048}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{8ffec700-23c4-4920-aa1b-a195e70361d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Compute">
+      <UniqueIdentifier>{05a26740-afa7-45fb-b476-64086eeb68b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SDF">
+      <UniqueIdentifier>{9409ad06-a205-4615-9047-386ceaf68c3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Interpolation">
+      <UniqueIdentifier>{00f8d4fc-dc34-4e87-bf5b-5b19e1e9705a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Utils">
+      <UniqueIdentifier>{ce00807f-9137-4e60-94e3-4fb932e81c8b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ShaderSource Include="Shaders\Compute\g12d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\sdf2d.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\g12d.ps.slang">
+      <Filter>Shaders</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\g12d.vs.slang">
+      <Filter>Shaders</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filter2d.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\sdf3d.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\g13d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Utils\ray.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filterg13d.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\g23d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filterg23d.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\read.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\3d.ps.slang">
+      <Filter>Shaders</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\3d.vs.slang">
+      <Filter>Shaders</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Utils\spheretrace.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Utils\includes.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\testing.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\read2d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+  </ItemGroup>
+</Project>
