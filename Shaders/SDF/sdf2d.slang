@@ -29,6 +29,16 @@ float sdHexagram(float2 p, float r)
     return length(p) * sign(p.y);
 }
 
+float sdHorseshoe(float2 p, float2 c,  float r, float2 w)
+{
+    p.x = abs(p.x);
+    float l = length(p);
+    p = float2(p.x * -c.x + c.y * p.y, p.x * c.y + p.y * c.x);
+    p = float2((p.y > 0.0 || p.x > 0.0) ? p.x : l * sign(-c.x),
+             (p.x > 0.0) ? p.y : l);
+    p = float2(p.x, abs(p.y - r)) - w;
+    return length(max(p, 0.0)) + min(0.0, max(p.x, p.y));
+}
 
 
 float map(float2 p)
@@ -42,7 +52,9 @@ float map(float2 p)
     #if SDF == 2
         return sdHexagram(p, 0.5);
     #endif
-
+    #if SDF == 3
+        return sdHorseshoe(p, float2(cos(1.2),sin(1.2)),0.5,float2(0.750,0.2));
+    #endif
     return 0.0f;
 }
 

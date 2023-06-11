@@ -10,24 +10,14 @@ void RenderProgram::setupGui() {
     Gui::RadioButton tex16;
     tex16.label = "16 bit";
     tex16.buttonID = 0;
+    tex16.sameLine = true;
     Gui::RadioButton tex32;
     tex32.label = "32 bit";
     tex32.buttonID = 1;
+    tex32.sameLine = true;
     bg_texsize.push_back(tex16);
     bg_texsize.push_back(tex32);
 
-    Gui::RadioButton no;
-    no.label = "no interpolation";
-    no.buttonID = Interpolation::no;
-    Gui::RadioButton linear;
-    linear.label = "trilinear";
-    linear.buttonID = Interpolation::trilinear;
-    Gui::RadioButton csg;
-    csg.label = "csg";
-    csg.buttonID = Interpolation::csg;
-    bg_interp.push_back(no);
-    bg_interp.push_back(linear);
-    bg_interp.push_back(csg);
 }
 
 bool RenderProgram::isOutOfBox(float3 pos)
@@ -41,11 +31,17 @@ bool RenderProgram::isOutOfBox(float3 pos)
 }
 
 void RenderProgram::writeToFile() {
+    fileerror = false;
+    if (!texturedone) {
+        fileerror = true;
+        msg = "No field";
+        return;
+    }
     std::ofstream tfile = std::ofstream(filename);
-    tfile << resolution << std::endl;
+    tfile << resolution <<" "<<boundingBox<<" "<<dimension<<" "<<field<< std::endl;
 
     int end = resolution * resolution;
-    if (bn > 1)
+    if (dimension == 3)
         end *= resolution;
 
     for (int i = 0; i < end; i++) {
@@ -58,6 +54,22 @@ void RenderProgram::writeToFile() {
     }
 
     tfile.close();
+}
+
+
+void RenderProgram::fileGui(Gui::Window* f) {
+
+
+    f->textbox("file name", filename);
+    if (f->button("write to file")) {
+        writeToFile();
+    }
+    if (f->button("read from file")) {
+        read = true;
+    }
+    if (fileerror) {
+        f->text(msg);
+    }
 }
 
 

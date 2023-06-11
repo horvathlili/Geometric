@@ -15,12 +15,13 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
     if (w->button("start")) {
         retexture = true;
         resolution = sliderRes;
+        boundingBox = sliderboundingBox;
     }
     (w->radioButtons(bg_texsize, texturesize));
 
     w->slider("resolution", sliderRes, 1, 100);
 
-    (w->slider("boundingBox", boundingBox, 2.f, 20.f));
+    (w->slider("boundingBox", sliderboundingBox, 2.f, 20.f));
     w->separator();
     w->radioButtons(bg_sdf3d, sdf3d);
     w->separator();
@@ -88,13 +89,37 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
 }
 
 std::vector<Texture::SharedPtr> RenderProgram3DG1::readFromFile(RenderContext* pRenderContext) {
+    fileerror = false;
+
     std::ifstream tfile(filename);
 
+    if (tfile.fail()) {
+        fileerror = true;
+        msg = "No such file";
+        return textures;
+    }
+
     int r;
+    float b;
 
     tfile >> r;
+    tfile >> b;
+
+    int d, f;
+    tfile >> d;
+    tfile >> f;
+
+    if (d != dimension || f != field) {
+        fileerror = true;
+        msg = "Wrong dimension/order";
+        tfile.close();
+        return textures;
+    }
+
     resolution = r;
+    boundingBox = b;
     sliderRes = r;
+    sliderboundingBox = b;
 
     data1.clear(); data2.clear();  posdata.clear();
 

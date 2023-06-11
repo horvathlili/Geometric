@@ -14,19 +14,32 @@ void GeometricFields::setUpGui() {
     Gui::RadioButton g23d;
     g23d.label = "G2 (3D)";
     g23d.buttonID = Field::g23d;
+    g23d.sameLine = false;
     Gui::RadioButton g12d;
     g12d.label = "G1 (2D)";
     g12d.buttonID =Field::g12d;
+    g12d.sameLine = true;
     Gui::RadioButton g13d;
     g13d.label = "G1 (3D)";
     g13d.buttonID = Field::g13d;
+    g13d.sameLine = true;
+    Gui::RadioButton g03d;
+    g03d.label = "G0 (3D)";
+    g03d.buttonID = Field::g03d;
+    g03d.sameLine = true;
+    Gui::RadioButton g02d;
+    g02d.label = "G0 (2D)";
+    g02d.buttonID = Field::g02d;
+    g02d.sameLine = true;
     bg_field.push_back(g23d);
     bg_field.push_back(g12d);
     bg_field.push_back(g13d);
+    bg_field.push_back(g03d);
+    bg_field.push_back(g02d);
  
 }
 
-void GeometricFields::initData() {
+void GeometricFields::initPlane() {
 
     const Vertex vertices[] =
     {
@@ -52,9 +65,11 @@ void GeometricFields::initData() {
     pVao = Vao::create(Vao::Topology::TriangleStrip, pLayout, buffers);
     FALCOR_ASSERT(pVao);
 
-    program2D.setVao(pVbo, pVao);
+    program2DG0.setVao(pVbo, pVao);
+    program2DG1.setVao(pVbo, pVao);
     program3DG1.setVao(pVbo, pVao);
     program3DG2.setVao(pVbo, pVao);
+    program3DG0.setVao(pVbo, pVao);
 }
 
 void GeometricFields::initBox() {
@@ -123,6 +138,7 @@ void GeometricFields::initBox() {
 
     program3DG1.setCubeVao(cubeVbo, cubeVao);
     program3DG2.setCubeVao(cubeVbo, cubeVao);
+    program3DG0.setCubeVao(cubeVbo, cubeVao);
 }
 void GeometricFields::initCamera() {
 
@@ -140,26 +156,34 @@ void GeometricFields::initCamera() {
 
     program3DG1.setCamera(camera, cameraControl);
     program3DG2.setCamera(camera, cameraControl);
+    program3DG0.setCamera(camera, cameraControl);
 }
 
 void GeometricFields::onGuiRender(Gui* pGui)
 {
-    Gui::Window w(pGui, "Field", { 350, 200 }, { 10, 90 });
+    Gui::Window w(pGui, "Field", { 500, 360 }, { 10, 10 });
    
     w.radioButtons(bg_field, field);
 
+    if (field == Field::g02d) {
+        program2DG0.renderGui(&w);
+    }
     if (field == Field::g12d) {
-        program2D.renderGui(&w);
+        program2DG1.renderGui(&w);
     }
     if (field == Field::g13d) {
         program3DG1.renderGui(&w);    
     } 
-  if (field == Field::g23d) {
+     if (field == Field::g23d) {
       program3DG2.renderGui(&w);
      
     }
+     if (field == Field::g03d) {
+         program3DG0.renderGui(&w);
 
-  Gui::Window t(pGui, "Test", { 350, 200 }, { 1000, 90 });
+     }
+
+  Gui::Window t(pGui, "Test", { 350, 150 }, { 700, 10 });
 
  
   if (field == Field::g13d) {
@@ -168,16 +192,25 @@ void GeometricFields::onGuiRender(Gui* pGui)
   if (field == Field::g23d) {
       program3DG2.testGui(&w);
   }
+  if (field == Field::g03d) {
+      program3DG0.testGui(&w);
+  }
 
-  Gui::Window f(pGui, "File", { 350, 200 }, { 800, 90 });
+  Gui::Window f(pGui, "File", { 350, 150 }, { 700, 170 });
+  if (field == Field::g02d) {
+      program2DG0.fileGui(&w);
+  }
   if (field == Field::g12d) {
-      program2D.fileGui(&w);
+      program2DG1.fileGui(&w);
   }
   if (field == Field::g13d) {
       program3DG1.fileGui(&w);
   }
   if (field == Field::g23d) {
       program3DG2.fileGui(&w);
+  }
+  if (field == Field::g03d) {
+      program3DG0.fileGui(&w);
   }
 
 }
@@ -188,7 +221,7 @@ void GeometricFields::onLoad(RenderContext* pRenderContext)
     setUpGui();
 
     //init Vao-s and camera
-    initData(); initBox();
+    initPlane(); initBox();
    
     initCamera();
    
@@ -208,15 +241,20 @@ void GeometricFields::onFrameRender(RenderContext* pRenderContext, const Fbo::Sh
     //program3DG2.cameraControl->update();
     
     
-
+    if (field == Field::g02d) {
+        program2DG0.Render(pRenderContext, pTargetFbo);
+    }
     if (field == Field::g12d) {
-        program2D.Render(pRenderContext, pTargetFbo);
+        program2DG1.Render(pRenderContext, pTargetFbo);
     }
     if (field == Field::g13d) {
         program3DG1.Render(pRenderContext, pTargetFbo);
     }
     if (field == Field::g23d) {
         program3DG2.Render(pRenderContext, pTargetFbo);
+    }
+    if (field == Field::g03d) {
+        program3DG0.Render(pRenderContext, pTargetFbo);
     }
 }
 
@@ -254,6 +292,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     SampleConfig config;
     config.windowDesc.title = "Falcor Project Template";
     config.windowDesc.resizableWindow = true;
+    config.windowDesc.width = 1280;
+    config.windowDesc.height = 720;
     Sample::run(config, pRenderer);
     return 0;
 }

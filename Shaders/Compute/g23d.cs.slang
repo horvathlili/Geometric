@@ -56,7 +56,8 @@ void main(uint3 threadId : SV_DispatchThreadID)
     }
     n = getNormal(fp);
 
-    
+    //inside
+    bool inside = map(pos) < 0;
 
     //calculate local base
     float3 b1, b2;
@@ -151,28 +152,23 @@ void main(uint3 threadId : SV_DispatchThreadID)
 
     float D = sqrt(max(0, (A + C) * (A + C) - 4 * (A * C - B * B)));
 
-    if (A + C >= 0)
-    {
-        R = 0.5f * ((A + C) - D);
-        r = 0.5f * ((A + C) + D);
-    }
-    else
+    R = 0.5f * ((A + C) - D);
+    r = 0.5f * ((A + C) + D);
+    
+    if (abs(R) > abs(r))
     {
         R = 0.5f * ((A + C) + D);
         r = 0.5f * ((A + C) - D);
     }   
 
-   
+    float lambda = r;
     
-        float2 axis = float2(1, (A - r) / B);
+    
+    float2 axis = float2(1, (A - lambda) / -B);
     float3 d = normalize(axis.x * b1 + axis.y * b2);
 
-    if (isnan(r))
-    {
-        r = 0;
-        R = 0;
-        d = float3(0, 1, 0);
-    }
+    
+     
 
     int datai = threadId.x * res * res + threadId.y * res + threadId.z;
   

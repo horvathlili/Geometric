@@ -12,18 +12,18 @@ RenderProgram3DG2::RenderProgram3DG2() {
     field = 2;
 }
 
-
 void RenderProgram3DG2::renderGui(Gui::Window* w) {
     //generating field
     if (w->button("start")) {
         retexture = true;
         resolution = sliderRes;
+        boundingBox = sliderboundingBox;
     }
     (w->radioButtons(bg_texsize, texturesize));
 
     w->slider("resolution", sliderRes, 1, 100);
 
-    (w->slider("boundingBox", boundingBox, 2.f, 20.f));
+    (w->slider("boundingBox", sliderboundingBox, 2.f, 20.f));
     w->separator();
     w->slider("finegird Size", finegridSize, 0.f, 1.5f);
     w->slider("finegird Res", finegridRes, 1, 10);
@@ -55,8 +55,6 @@ std::vector<float> getPseudoInverse(float finegridsize, int finegridres) {
     for (int i = -finegridres; i <= finegridres; i++) {
         for (int j = -finegridres; j <= finegridres; j++) {
             float2 p = float2(i, j) * step;
-
-            std::cout << p.x << " " << p.y << std::endl;
 
             //z
             m(((i + finegridres) * number + (j + finegridres)) * 3, 0) = 0.5f * p.x * p.x;
@@ -101,7 +99,6 @@ std::vector<float> getPseudoInverse(float finegridsize, int finegridres) {
             linearisedpi.push_back(pseudoinverse(i, j));
         }
     }
-    std::cout << Eigen::ComputationInfo() << std::endl;
 
     return linearisedpi;
 }
@@ -175,13 +172,37 @@ std::vector<Texture::SharedPtr> RenderProgram3DG2::generateTexture(RenderContext
 }
 
 std::vector<Texture::SharedPtr> RenderProgram3DG2::readFromFile(RenderContext* pRenderContext) {
+    fileerror = false;
+
     std::ifstream tfile(filename);
 
+    if (tfile.fail()) {
+        fileerror = true;
+        msg = "No such file";
+        return textures;
+    }
+
     int r;
+    float b;
 
     tfile >> r;
+    tfile >> b;
+
+    int d, f;
+    tfile >> d;
+    tfile >> f;
+
+    if (d != dimension || f != field) {
+        fileerror = true;
+        msg = "Wrong dimension/order";
+        tfile.close();
+        return textures;
+    }
+
     resolution = r;
+    boundingBox = b;
     sliderRes = r;
+    sliderboundingBox = b;
 
     data1.clear(); data2.clear(); data3.clear();posdata.clear();
 

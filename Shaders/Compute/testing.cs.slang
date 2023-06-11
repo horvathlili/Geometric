@@ -1,4 +1,4 @@
-#include "../Utils/includes.slang"
+#include "../Utils/includes3d.slang"
 #include "../SDF/sdf3d.slang"
 
 
@@ -14,11 +14,17 @@ cbuffer csCb
 
 float3 getRandomPointOnSphere(float i, float j)
 {
-    float u = randoms[i * testres + j].x;
-    float v = randoms[i * testres + j].y;
+    float k = i * testres + j;
+    float N= testres * testres;
+    
 
-    u = 2 * radians(180) * u;
-    v = acos(2 * v - 1);
+    float h = 1 - ((2 * k - 1) / N);
+
+    float u = acos(h);
+
+    float L = sqrt(N * radians(180));
+
+    float v = L * u;
 
     float3 psphere = float3(sin(v) * cos(u), cos(v), sin(v) * sin(u));
 
@@ -41,12 +47,12 @@ float3 getPointOnSphere(int i, int j)
 [numthreads(8, 8)]
 void main(uint3 threadId : SV_DispatchThreadID)
 {
-    if (any(threadId.xyz >= float3(testres)))
+    if (any(threadId.xy >= float2(testres)))
         return;
     
     Ray r;
     r.p = getRandomPointOnSphere(threadId.x,threadId.y);
-    r.v = normalize(-r.p);
+   r.v = normalize(-r.p);
 
     float t = 0.0f;
     int i;
@@ -54,14 +60,14 @@ void main(uint3 threadId : SV_DispatchThreadID)
     int n = 100;
     float3 pos = r.p + t * r.v;
    
-       
+      
     for (i = 0; i < n; i++)
     {
         pos = r.p + t * r.v;
-       
+
         h = filter(pos);
        
-        if (h < 0.0001 || isOutOfBox(pos))
+        if (h < 0.000001 || isOutOfBox(pos))
             break;
         t += h;
     }
@@ -69,13 +75,13 @@ void main(uint3 threadId : SV_DispatchThreadID)
     float3 hitpos = r.p + t * r.v;
 
     float error = 0;
-    if (!isOutOfBox(pos))
-    {
-        error = map(hitpos);
 
-    }
+    if (!isOutOfBox(hitpos))
+        error = map(hitpos);       
+
+ 
     
-    tex[threadId.xy] = float4(1,1-error,1-error, 1);
+    tex[threadId.xy] = float4(1, 1 - error, 1 - error, 1);
     errors[threadId.x * testres + threadId.y] = error;
    
 }

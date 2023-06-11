@@ -31,6 +31,9 @@ void main(uint3 threadId : SV_DispatchThreadID)
 
     float4 index = posdata[threadId.x * res * res + threadId.y * res + threadId.z];
 
+    #if FIELD == 0 //3D G0
+         texfp[index.xyz] = data1[threadId.x * res * res + threadId.y * res + threadId.z];
+    #endif
     
     #if FIELD == 1 //3D G1
         texfp[index.xyz] = data1[threadId.x * res * res + threadId.y * res + threadId.z];

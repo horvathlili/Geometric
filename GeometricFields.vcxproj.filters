@@ -20,6 +20,18 @@
     <ClCompile Include="Utils\Render3D\RenderProgram3DG2.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\Render3D\RenderProgram3DG0.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Render2D\RenderProgram2DG1.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Render2D\RenderProgram2DG0.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Shaders\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeometricFields.h" />
@@ -39,6 +51,15 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Utils\Render3D\RenderProgram3DG2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render3D\RenderProgram3DG0.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render2D\RenderProgram2DG1.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render2D\RenderProgram2DG0.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -69,13 +90,13 @@
     <ShaderSource Include="Shaders\SDF\sdf2d.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\g12d.ps.slang">
+    <ShaderSource Include="Shaders\2d.ps.slang">
       <Filter>Shaders</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\g12d.vs.slang">
+    <ShaderSource Include="Shaders\2d.vs.slang">
       <Filter>Shaders</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\Interpolation\filter2d.slang">
+    <ShaderSource Include="Shaders\Interpolation\filterg12d.slang">
       <Filter>Shaders\Interpolation</Filter>
     </ShaderSource>
     <ShaderSource Include="Shaders\SDF\sdf3d.slang">
@@ -108,7 +129,7 @@
     <ShaderSource Include="Shaders\Utils\spheretrace.slang">
       <Filter>Shaders\Utils</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\Utils\includes.slang">
+    <ShaderSource Include="Shaders\Utils\includes3d.slang">
       <Filter>Shaders\Utils</Filter>
     </ShaderSource>
     <ShaderSource Include="Shaders\Compute\testing.cs.slang">
@@ -116,6 +137,27 @@
     </ShaderSource>
     <ShaderSource Include="Shaders\Compute\read2d.cs.slang">
       <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\g03d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filterg03d.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Utils\includes2d.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\g02d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filterg02d.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\head.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="snail.slang">
+      <Filter>Shaders\SDF</Filter>
     </ShaderSource>
   </ItemGroup>
 </Project>

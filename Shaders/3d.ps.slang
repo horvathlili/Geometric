@@ -1,4 +1,4 @@
-#include "Utils/includes.slang"
+#include "Utils/includes3d.slang"
 
 struct psIn
 {
@@ -93,11 +93,12 @@ PsOut main(psIn input) : SV_TARGET
 
                 
             }
-          
-            if (dot(r.v, normalize(float3(fp - r.p))) > 0.9999)
-            {
-                o.col = float4(1,0,0, 1);
-            }
+        }
+
+        
+        if (dot(r.v, normalize(float3(fp - r.p))) > 0.9999 && length(eye.xyz - hitpos.xyz) > length(eye.xyz - fp)-0.01)
+        {
+            o.col = float4(1, 0, 0, 1);
         }
     }
   

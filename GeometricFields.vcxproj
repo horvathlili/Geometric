@@ -12,8 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometricFields.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="Utils\ComputeProgramWrapper.cpp" />
+    <ClCompile Include="Utils\Render2D\RenderProgram2DG0.cpp" />
+    <ClCompile Include="Utils\Render2D\RenderProgram2DG1.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3D.cpp" />
+    <ClCompile Include="Utils\Render3D\RenderProgram3DG0.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3DG1.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3DG2.cpp" />
     <ClCompile Include="Utils\RenderProgram.cpp" />
@@ -22,7 +26,10 @@
   <ItemGroup>
     <ClInclude Include="GeometricFields.h" />
     <ClInclude Include="Utils\ComputeProgramWrapper.h" />
+    <ClInclude Include="Utils\Render2D\RenderProgram2DG0.h" />
+    <ClInclude Include="Utils\Render2D\RenderProgram2DG1.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3D.h" />
+    <ClInclude Include="Utils\Render3D\RenderProgram3DG0.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3DG1.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3DG2.h" />
     <ClInclude Include="Utils\RenderProgram.h" />
@@ -36,22 +43,29 @@
   <ItemGroup>
     <ShaderSource Include="Shaders\3d.ps.slang" />
     <ShaderSource Include="Shaders\3d.vs.slang" />
+    <ShaderSource Include="Shaders\Compute\g02d.cs.slang" />
+    <ShaderSource Include="Shaders\Compute\g03d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g12d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g13d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g23d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\read.cs.slang" />
     <ShaderSource Include="Shaders\Compute\read2d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\testing.cs.slang" />
-    <ShaderSource Include="Shaders\g12d.ps.slang" />
-    <ShaderSource Include="Shaders\g12d.vs.slang" />
-    <ShaderSource Include="Shaders\Interpolation\filter2d.slang" />
+    <ShaderSource Include="Shaders\2d.ps.slang" />
+    <ShaderSource Include="Shaders\2d.vs.slang" />
+    <ShaderSource Include="Shaders\Interpolation\filterg02d.slang" />
+    <ShaderSource Include="Shaders\Interpolation\filterg12d.slang" />
+    <ShaderSource Include="Shaders\Interpolation\filterg03d.slang" />
     <ShaderSource Include="Shaders\Interpolation\filterg13d.slang" />
     <ShaderSource Include="Shaders\Interpolation\filterg23d.slang" />
+    <ShaderSource Include="Shaders\SDF\head.slang" />
     <ShaderSource Include="Shaders\SDF\sdf2d.slang" />
     <ShaderSource Include="Shaders\SDF\sdf3d.slang" />
-    <ShaderSource Include="Shaders\Utils\includes.slang" />
+    <ShaderSource Include="Shaders\Utils\includes2d.slang" />
+    <ShaderSource Include="Shaders\Utils\includes3d.slang" />
     <ShaderSource Include="Shaders\Utils\ray.slang" />
     <ShaderSource Include="Shaders\Utils\spheretrace.slang" />
+    <ShaderSource Include="snail.slang" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65BCD11B-FC56-4F3D-9976-084933AF4187}</ProjectGuid>

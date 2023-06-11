@@ -18,8 +18,8 @@ float noInterp(float3 pos)
 {
     float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
 
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
    
@@ -30,18 +30,18 @@ float4 debug(float3 pos,float3 debugpos)
 {
     float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res);
 
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
    
-    return float4(0, 0, 0, sdPlane(pos, t2.xyz, t1.xyz));
+    return float4(t1.xyz, sdPlane(pos, t2.xyz, t1.xyz));
 }
 
 float getTexture(float3 uvw, float3 pos)
 {
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
    
@@ -193,25 +193,25 @@ float csg( float3 pos)
         
     float3 fp[4];
     float3 n[4];
-    fp[0] = texturefp[uvw].xyz;
-    n[0] = texturen[uvw].xyz;
-    fp[1] = texturefp[uvw + float3(1, 0, 0)].xyz;
-    n[1] = texturen[uvw + float3(1, 0, 0)].xyz;
-    fp[2] = texturefp[uvw + float3(1, 0, 1)].xyz;
-    n[2] = texturen[uvw + float3(1, 0, 1)].xyz;
-    fp[3] = texturefp[uvw + float3(0, 0, 1)].xyz;
-    n[3] = texturen[uvw + float3(0, 0, 1)].xyz;
+    fp[0] = texture1[uvw].xyz;
+    n[0] = texture2[uvw].xyz;
+    fp[1] = texture1[uvw + float3(1, 0, 0)].xyz;
+    n[1] = texture2[uvw + float3(1, 0, 0)].xyz;
+    fp[2] = texture1[uvw + float3(1, 0, 1)].xyz;
+    n[2] = texture2[uvw + float3(1, 0, 1)].xyz;
+    fp[3] = texture1[uvw + float3(0, 0, 1)].xyz;
+    n[3] = texture2[uvw + float3(0, 0, 1)].xyz;
 
     float3 fp2[4];
     float3 n2[4];
-    fp2[0] = texturefp[uvw + float3(0, 1, 0)].xyz;
-    n2[0] = texturen[uvw + float3(0, 1, 0)].xyz;
-    fp2[1] = texturefp[uvw + float3(1, 1, 0)].xyz;
-    n2[1] = texturen[uvw + float3(1, 1, 0)].xyz;
-    fp2[2] = texturefp[uvw + float3(1, 1, 1)].xyz;
-    n2[2] = texturen[uvw + float3(1, 1, 1)].xyz;
-    fp2[3] = texturefp[uvw + float3(0, 1, 1)].xyz;
-    n2[3] = texturen[uvw + float3(0, 1, 1)].xyz;
+    fp2[0] = texture1[uvw + float3(0, 1, 0)].xyz;
+    n2[0] = texture2[uvw + float3(0, 1, 0)].xyz;
+    fp2[1] = texture1[uvw + float3(1, 1, 0)].xyz;
+    n2[1] = texture2[uvw + float3(1, 1, 0)].xyz;
+    fp2[2] = texture1[uvw + float3(1, 1, 1)].xyz;
+    n2[2] = texture2[uvw + float3(1, 1, 1)].xyz;
+    fp2[3] = texture1[uvw + float3(0, 1, 1)].xyz;
+    n2[3] = texture2[uvw + float3(0, 1, 1)].xyz;
 
     float e = boundingBox / (float) res * 2.0f;
 

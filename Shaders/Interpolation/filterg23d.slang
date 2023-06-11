@@ -82,11 +82,13 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis,float 
     float dTorus = sdTorus(p, c, axis, r, R);
 
     //if the curvature is small use a plane
-    if (abs(kr) < 0.01 && abs(kR) < 0.01)
+    if (abs(kr) < 0.01 && abs(kR) < 0.1)
     {
         return max(sdPlane(p, normalize(sign * n), fp), dSphere);
     }
 
+
+    //cylinder
     if (abs(kR) < 0.1 || abs(kr) < 0.1)
     {
         c = fp + n * 1 / kr;
@@ -150,8 +152,8 @@ float noInterp(float3 pos)
     float3 texelcenter = -float3(boundingBox / 2.0f)+((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
 
     
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float3 fp = t1.xyz;
     float3 d = normalize(t2.xyz);
@@ -159,7 +161,7 @@ float noInterp(float3 pos)
     float R = t2.w;    
 
     //calculating the normalvector for the representation conversion
-    float3 n = texturennn[uvw].xyz;
+    float3 n = texture3[uvw].xyz;
 
     float sr = boundingBox / (float) res  ;
    
@@ -175,8 +177,8 @@ float4 debug(float3 pos, float3 debugpos)
 
     
     
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float3 fp = t1.xyz;
     float3 axis = t2.xyz;
@@ -184,7 +186,7 @@ float4 debug(float3 pos, float3 debugpos)
     float kR = t2.w;
 
     //calculating the normalvector for the representation conversion
-    float3 n = texturennn[uvw].xyz;
+    float3 n = texture3[uvw].xyz;
      //if the curvature is small use a plane
     if (abs(kr) < 0.1 && abs(kR) < 0.1)
     {
@@ -224,8 +226,8 @@ float4 debug(float3 pos, float3 debugpos)
 
 float getTexture(float3 uvw, float3 pos)
 {    
-    float4 t1 = texturefp[uvw];
-    float4 t2 = texturen[uvw];
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
 
     float3 fp = t1.xyz;
     float3 d = t2.xyz;
@@ -233,7 +235,7 @@ float getTexture(float3 uvw, float3 pos)
     float R = t2.w;
 
     //calculating the normalvector for the representation conversion
-    float3 n = texturennn[uvw].xyz;
+    float3 n = texture3[uvw].xyz;
 
     float sr = boundingBox / (float) res*1.5f;
    

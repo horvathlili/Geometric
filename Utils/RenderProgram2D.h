@@ -3,27 +3,25 @@
 
 class RenderProgram2D : public RenderProgram {
 
-private:
+protected:
 
-    enum SDF2d { circle, moon, star };
+    enum SDF2d { circle, moon, star, horseshoe };
     uint sdf2d = SDF2d::circle;
 
     //gui
     Gui::RadioButtonGroup bg_sdf2d;
 
    
-    std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) override;
+    std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) = 0;
     void setupGui() override;
 
-    std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext) override;
+    std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext) = 0;
 
-    //debug
-    float2 debugpos_2d;
 
 public:
     void Render(RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) override;
-    void renderGui(Gui::Window* w) override;
-    void fileGui(Gui::Window* f);
+    void renderGui(Gui::Window* w) = 0;
+    
     
     RenderProgram2D();
 };

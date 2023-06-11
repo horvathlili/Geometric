@@ -19,6 +19,8 @@ RenderProgram3D::RenderProgram3D() {
 
     Vars = GraphicsVars::create(State->getProgram().get());
 
+    dimension = 3;
+
     readProgram = ComputeProgramWrapper::create();
     readProgram->createProgram("Samples/GeometricFields/Shaders/Compute/read.cs.slang");
 
@@ -29,23 +31,52 @@ RenderProgram3D::RenderProgram3D() {
 void RenderProgram3D::setupGui() {
 
 
+
+    Gui::RadioButton no;
+    no.label = "no interpolation";
+    no.buttonID = Interpolation::no;
+    no.sameLine = false;
+    Gui::RadioButton linear;
+    linear.label = "trilinear";
+    linear.buttonID = Interpolation::trilinear;
+    linear.sameLine = true;
+    Gui::RadioButton csg;
+    csg.label = "csg";
+    csg.buttonID = Interpolation::csg;
+    csg.sameLine = true;
+    bg_interp.push_back(no);
+    bg_interp.push_back(linear);
+    bg_interp.push_back(csg);
+
+
     //sdf 3d
     Gui::RadioButton sphere;
     sphere.label = "Sphere";
     sphere.buttonID = SDF3d::sphere;
+    sphere.sameLine = false;
     Gui::RadioButton torus;
     torus.label = "Torus";
     torus.buttonID = SDF3d::torus;
+    torus.sameLine = true;
     Gui::RadioButton octa;
     octa.label = "Octahedron";
     octa.buttonID = SDF3d::octahedron;
+    octa.sameLine = true;
     Gui::RadioButton head;
     head.label = "Head";
     head.buttonID = SDF3d::head;
+    head.sameLine = true;
+    Gui::RadioButton snail;
+    snail.label = "Snail";
+    snail.buttonID = SDF3d::snail;
+    snail.sameLine = true;
+   
     bg_sdf3d.push_back(sphere);
     bg_sdf3d.push_back(torus);
     bg_sdf3d.push_back(octa);
     bg_sdf3d.push_back(head);
+    bg_sdf3d.push_back(snail);
+ 
 
     RenderProgram::setupGui();
 
@@ -76,11 +107,17 @@ Texture::SharedPtr RenderProgram3D::testing(RenderContext* pRenderContext) {
 
     auto& comp = *testProgram;
 
+    {
+        Sampler::Desc desc;
+        desc.setFilterMode(Sampler::Filter::Linear, Sampler::Filter::Linear, Sampler::Filter::Linear);
+        mpSampler = Sampler::create(desc);
+    }
+
     comp["tex"].setUav(pTex->getUAV(0));
     comp["csCb"]["testres"] = testres;
-   comp["texturefp"] = textures[0];
-   comp["texturen"] = textures[1];
-   comp["texturennn"] = textures[2];
+   comp["texture1"] = textures[0];
+   comp["texture2"] = textures[1];
+   comp["texture3"] = textures[2];
    comp["psCb"]["eye"] = camera->getPosition();
    comp["psCb"]["center"] = camera->getTarget();
     comp["psCb"]["up"] = camera->getUpVector();
@@ -89,6 +126,7 @@ Texture::SharedPtr RenderProgram3D::testing(RenderContext* pRenderContext) {
     comp["psCb"]["boundingBox"] = boundingBox;
     comp["psCb"]["viewproj"] = camera->getViewProjMatrix();
     comp["psCb"]["res"] = resolution;
+    comp["mSampler"] = mpSampler;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf3d));
     comp.getProgram()->addDefine("FIELD", std::to_string(field));
     comp.getProgram()->addDefine("INTERP", std::to_string(interp));
@@ -121,19 +159,24 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
     isbox = isOutOfBox(camera->getPosition());
 
     if (retexture) {
+        fileerror = false;
         textures = generateTexture(pRenderContext);
         retexture = false;
         texturedone = true;
-    }
+   }
 
     if (read) {
         textures = readFromFile(pRenderContext);
         read = false;
+        if (!fileerror)
         texturedone = true;
     }
 
-    if (test) {
+    if (test && texturedone) {
         testTexture = testing(pRenderContext);
+        test = false;
+    }
+    else {
         test = false;
     }
 
@@ -144,9 +187,9 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Vars["vsCb"]["viewproj"] = camera->getViewProjMatrix();
         Vars["vsCb"]["box"] = isbox;
 
-        Vars["texturefp"] = textures[0];
-        Vars["texturen"] = textures[1];
-        Vars["texturennn"] = textures[2];
+        Vars["texture1"] = textures[0];
+        Vars["texture2"] = textures[1];
+        Vars["texture3"] = textures[2];
         Vars["testtexture"] = testTexture;
         Vars["psCb"]["eye"] = camera->getPosition();
         Vars["psCb"]["center"] = camera->getTarget();
@@ -159,6 +202,7 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Vars["psCb"]["debugpos"] = debugpos_3d;
         Vars["psCb"]["debugging"] = debugging;
         Vars["psCb"]["restest"] = testres;
+        Vars["mSampler"] = mpSampler;
         Program->addDefine("SDF", std::to_string(sdf3d));
         Program->addDefine("INTERP", std::to_string(interp));
         Program->addDefine("FIELD", std::to_string(field));
@@ -183,14 +227,4 @@ void RenderProgram3D::testGui(Gui::Window* t) {
     t->text("Max error: " + std::to_string(maxerror));
     t->text("Average error: " + std::to_string(avgerror));
 
-}
-void RenderProgram3D::fileGui(Gui::Window* f) {
-
-    f->textbox("file name", filename);
-    if (f->button("write to file")) {
-        writeToFile();
-    }
-    if (f->button("read from file")) {
-        read = true;
-    }
 }

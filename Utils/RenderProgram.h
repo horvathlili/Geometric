@@ -8,17 +8,18 @@ protected:
 
     enum Interpolation { no, trilinear, csg };
     uint interp = Interpolation::no;
-   
+
+
+    //plane
     struct Vertex
     {
         float3 pos;
         float3 col;
     };
-  
     Buffer::SharedPtr pVbo;
     Vao::SharedPtr pVao;
 
-    //gui TODO initialize in constructor 
+    //gui 
     Gui::RadioButtonGroup bg_texsize;
     Gui::RadioButtonGroup bg_interp;
 
@@ -37,12 +38,13 @@ protected:
     int resolution = 32;
     int sliderRes = 32;
     float boundingBox = 2.f;
+    float sliderboundingBox = 2.f;
     uint texturesize = 0;
 
     //textures of the field
     std::vector<Texture::SharedPtr> textures;
-    virtual std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) = 0;
-    virtual void setupGui() = 0;
+    Sampler::SharedPtr mpSampler;
+
     //debug
     bool debugging = false;
 
@@ -56,6 +58,10 @@ protected:
 
     //number of the used buffers
     int bn = 0;
+    //dimension of the field
+    int dimension = 0;
+    //order of the field
+    int field = 0;
 
     //filename for writing
     std::string filename = "file.txt";
@@ -63,15 +69,20 @@ protected:
     //reading from file
     bool read = false;
     ComputeProgramWrapper::SharedPtr readProgram;
-    virtual std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext) = 0;
+    bool fileerror = false;
+    std::string msg = "";
+   
 
+    //methods
+    virtual std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) = 0;
+    virtual void setupGui() = 0;
+    virtual std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext) = 0;
     void writeToFile();
 
 public:
     virtual void Render(RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) = 0;
     virtual void renderGui(Gui::Window* w) = 0;
+    void fileGui(Gui::Window* f);
 
-    void setVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao);
-  
-  
+    void setVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao); 
 };

@@ -3,10 +3,12 @@
 #endif
 
 #include "head.slang"
+#include "../../snail.slang"
+
 
 float sdfSphere(float3 p, float s)
 {
-    return length(p) - s;
+    return length(p) - s;    
 }
 
 float sdTorus(float3 p, float2 t)
@@ -37,7 +39,7 @@ float sdOctahedron(float3 p, float s)
 float map(float3 p)
 {
     #if SDF == 0
-        return sdfSphere(p, 0.3);
+        return sdfSphere(p, 0.5);
     #endif
     #if SDF == 1
             return sdTorus(p, float2(0.3, 0.1));
@@ -48,6 +50,10 @@ float map(float3 p)
     #if SDF == 3
         return headsdf(p);
     #endif
+    #if SDF == 4
+        return snailsdf(p);
+    #endif
+
 }
 
 float3 getNormal(float3 p)
