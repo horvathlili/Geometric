@@ -14,6 +14,24 @@ float sdPlane(float3 p, float3 n, float3 x)
     return dot(p, n) + h;
 }
 
+float sdCircle(float3 p, float3 n, float3 x, float r)
+{
+
+    float dd = dot(p - x, n);
+
+    float s = dd < 0 ? -1 : 1;
+
+    float3 c = p - dd * n;
+    if (length(c - x) > r)
+    {
+        c = x + normalize(c - x) * r;
+        return length(p - c);
+
+    }
+    return s * length(p - c);
+    
+}
+
 float noInterp(float3 pos)
 {
     float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
@@ -22,7 +40,10 @@ float noInterp(float3 pos)
     float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
-   
+
+
+    return sdCircle(pos, t2.xyz, t1.xyz,sr);
+    
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -44,7 +65,8 @@ float getTexture(float3 uvw, float3 pos)
     float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
-   
+
+    return sdCircle(pos, t2.xyz, t1.xyz, sr);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -78,7 +100,7 @@ float trilinear( float3 pos)
 
     float a3 = uvw.z - (int) uvw.z;
     float ha3 = 6 * pow(a3, 5) - 15 * pow(a3, 4) + 10 * pow(a3, 3);
-    return d0 * (1 - ha3) + d1 * ha3;
+    return  (d0 * (1 - ha3) + d1 * ha3);
 
     return 0;
 

@@ -144,6 +144,136 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis,float 
     return 1;
 }
 
+float sdExact(float3 pos)
+{
+    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res - 0.00001);
+
+    float3 texelcenter = -float3(boundingBox / 2.0f) + ((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
+
+    
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
+
+    float3 fp = t1.xyz;
+    float3 d = normalize(t2.xyz);
+    float kr = t1.w;
+    float kR = t2.w;
+
+    //calculating the normalvector for the representation conversion
+    float3 n = texture3[uvw].xyz;
+
+    float sr = boundingBox / (float) res;
+    float sign = 1;
+    if (dot(n, normalize(fp - pos)) > 0 && length(fp - pos) < 0.1)
+    {
+        sign = -1;
+    }
+    
+    
+
+    //smaller
+    float r = 1.0f / abs(kr);
+    float R;
+
+    //bigger (according to the orientation of the torus)
+    if (kr * kR > 0)
+    {
+        R = 1.0f / abs(kR) - r;
+    }
+    else
+    {
+        R = 1.0f / abs(kR) + r;
+    }
+
+    float3 cc = fp - n * r;
+    
+
+    //calculate center
+    float3 c = fp + n / kR;
+
+    if (abs(kr) < 0.01 && abs(kR) < 0.1)
+    {
+        return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
+    }
+
+    float dTorus = sdTorus(pos, c, d, r, R);
+
+    //calculate frequently used values
+  
+    float3 p2 = pos - c;
+    float3 e2 = normalize(d);
+    float3 norm = cross(e2, normalize(p2));
+
+    float3 e1 = normalize(cross(e2, norm));
+
+    float px = dot(e1, p2);
+    float py = dot(e2, p2);
+
+    float nx = dot(e1, n);
+    float ny = dot(e2, n);
+
+    float2 norm2 = normalize(float2(nx, ny));
+    
+    float dist1 = sqrt((px-R) * (px - R) + py * py) - r;
+    float dist2 = sqrt((px + R) * (px + R) + py * py) - r;
+
+   
+    float3 fpp = fp - c;
+    float fpx = dot(e1, fpp);
+    float fpy = dot(e2, fpp);
+
+    float fd1 = length(float2(R, 0) - float2(fpx, fpy));
+    float fd2 = length(float2(-R, 0) - float2(fpx, fpy));
+
+    float2 cp;
+    
+    //return dTorus;
+    if (fd1 < fd2)
+    {
+        dTorus = dist1;
+        cp = float2(R, 0);
+
+    }
+    else
+    {
+        dTorus = dist2;
+        cp = float2(-R, 0);
+    }
+       
+    
+    if (kr > 0)
+    {
+        norm2 *=  -1;
+    }
+   
+ 
+    float a =90;
+    float ra = radians(a);
+    
+    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+    {
+        return abs(dTorus);
+    }
+
+
+    //széle számolása
+
+    //széléhez mutató vektor
+
+    float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
+
+    float2 s1 = normalize(mul(rot1, norm2));
+    float2 ep1 = cp + s1 * r;
+
+    float2x2 rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
+
+    float2 s2 = normalize(mul(rot2, norm2));
+    float2 ep2 = cp + s2 * r;
+    
+    return 0.5*min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+   
+}
+
 float noInterp(float3 pos)
 {
     
@@ -168,9 +298,9 @@ float noInterp(float3 pos)
     return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, sr);
 }
 
-float4 debug(float3 pos, float3 debugpos)
+float4 debug2(float3 pos, float3 debugpos)
 {
-
+   
     float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res-0.0001);
 
     float3 texelcenter = -float3(boundingBox / 2.0f) + ((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
@@ -223,6 +353,141 @@ float4 debug(float3 pos, float3 debugpos)
    
     return float4(fp, sdTorus(pos, c, axis, r, R));
 }
+
+float4 debug(float3 pos, float3 debugpos)
+{
+   
+    float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res - 0.0001);
+
+    float3 texelcenter = -float3(boundingBox / 2.0f) + ((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
+
+    
+    
+    float4 t1 = texture1[uvw];
+    float4 t2 = texture2[uvw];
+
+    float3 fp = t1.xyz;
+    float3 d = t2.xyz;
+    float kr = t1.w;
+    float kR = t2.w;
+
+    //calculating the normalvector for the representation conversion
+    float3 n = texture3[uvw].xyz;
+     //if the curvature is small use a plane
+    float sr = boundingBox / (float) res;
+    float sign = 1;
+    if (dot(n, normalize(fp - pos)) > 0 && length(fp - pos) < 0.1)
+    {
+        sign = -1;
+    }
+    
+    
+
+    //smaller
+    float r = 1.0f / abs(kr);
+    float R;
+
+    //bigger (according to the orientation of the torus)
+    if (kr * kR > 0)
+    {
+        R = 1.0f / abs(kR) - r;
+    }
+    else
+    {
+        R = 1.0f / abs(kR) + r;
+    }
+
+    float3 cc = fp - n * r;
+    
+
+    //calculate center
+    float3 c = fp + n / kR;
+
+    if (abs(kr) < 0.01 && abs(kR) < 0.1)
+    {
+        return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
+    }
+
+    //calculate frequently used values
+ 
+    float dTorus = sdTorus(pos, c, d, r, R);
+   
+
+   
+
+    float3 p2 = pos - c;
+    float3 e2 = normalize(d);
+    float3 norm = cross(e2, normalize(p2));
+
+    float3 e1 = normalize(cross(e2, norm));
+
+    float px = dot(e1, p2);
+    float py = dot(e2, p2);
+
+    float nx = dot(e1, n);
+    float ny = dot(e2, n);
+
+    float2 norm2 = normalize(float2(nx, ny));
+    
+    float dist1 = sqrt((px - R) * (px - R) + py * py) - r;
+    float dist2 = sqrt((px + R) * (px + R) + py * py) - r;
+
+   
+    
+    float3 fpp = fp - c;
+    float fpx = dot(e1, fpp);
+    float fpy = dot(e2, fpp);
+
+    float fd1 = length(float2(R, 0) - float2(fpx, fpy));
+    float fd2 = length(float2(-R, 0) - float2(fpx, fpy));
+
+    float2 cp;
+    
+    //return dTorus;
+    if (fd1 < fd2)
+    {
+        dTorus = dist1;
+        cp = float2(R, 0);
+
+    }
+    else
+    {
+        dTorus = dist2;
+        cp = float2(-R, 0);
+    }
+
+    if (kr > 0)
+    {
+        norm2 *= -1;
+    }
+    
+
+    float a = 90;
+    float ra = radians(a);
+    
+    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+    {
+        return abs(dTorus);
+    }
+
+
+    //széle számolása
+
+    //széléhez mutató vektor
+
+    float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
+
+    float2 s1 = normalize(mul(rot1, norm2));
+    float2 ep1 = cp + s1 * r;
+
+    float2x2 rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
+
+    float2 s2 = normalize(mul(rot2, norm2));
+    float2 ep2 = cp + s2 * r;
+    
+    return min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+}
+
 
 float getTexture(float3 uvw, float3 pos)
 {    
@@ -278,6 +543,7 @@ float trilinear(float3 pos)
 float filter(float3 p)
 {
     #if INTERP == 0
+    return sdExact(p);
     return noInterp(p);
     #endif
     #if INTERP == 1

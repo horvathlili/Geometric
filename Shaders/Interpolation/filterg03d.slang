@@ -96,6 +96,6 @@ float3 getNormal_filter(float3 pos)
 {
     float3 uvw = ((pos) / float3(boundingBox) + 0.5);
    
-    return texture1.Sample(mSampler, uvw).gba;
+    return texture1.SampleLevel(mSampler, uvw, 0).gba;
 }
 

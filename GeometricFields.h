@@ -58,6 +58,7 @@ private:
     void setUpGui();
     Gui::RadioButtonGroup bg_field;
 
+    DebugConsole console;
 
   
 };

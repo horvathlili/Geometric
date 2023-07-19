@@ -12,7 +12,7 @@ cbuffer csCb
     int testres;
 };
 
-float3 getRandomPointOnSphere(float i, float j)
+float3 getRandomPointOnSphere(float i, float j,float r)
 {
     float k = i * testres + j;
     float N= testres * testres;
@@ -26,7 +26,7 @@ float3 getRandomPointOnSphere(float i, float j)
 
     float v = L * u;
 
-    float3 psphere = float3(sin(v) * cos(u), cos(v), sin(v) * sin(u));
+    float3 psphere = float3(r*sin(v) * cos(u), r*cos(v), r*sin(v) * sin(u));
 
     return psphere;
 
@@ -44,42 +44,65 @@ float3 getPointOnSphere(int i, int j)
 
 }
 
+float3 getQueryPoint(float3 p)
+{
+    float3 pos = float3(-(float) boundingBox / 2.0);
+    pos.x += (float) boundingBox / (float) testres * (p.x + 0.5);
+    pos.y += (float) boundingBox / (float) testres * (p.y + 0.5);
+    pos.z += (float) boundingBox / (float) testres * (p.z + 0.5);
+
+    return pos;
+}
+
 [numthreads(8, 8)]
-void main(uint3 threadId : SV_DispatchThreadID)
+void main(uint2 threadId : SV_DispatchThreadID)
 {
     if (any(threadId.xy >= float2(testres)))
         return;
-    
-    Ray r;
-    r.p = getRandomPointOnSphere(threadId.x,threadId.y);
-   r.v = normalize(-r.p);
-
-    float t = 0.0f;
-    int i;
-    float h;
-    int n = 100;
-    float3 pos = r.p + t * r.v;
-   
-      
-    for (i = 0; i < n; i++)
-    {
-        pos = r.p + t * r.v;
-
-        h = filter(pos);
-       
-        if (h < 0.000001 || isOutOfBox(pos))
-            break;
-        t += h;
-    }
-
-    float3 hitpos = r.p + t * r.v;
 
     float error = 0;
 
-    if (!isOutOfBox(hitpos))
-        error = map(hitpos);       
+    for (int i = 1; i < 50; i++)
+    {
+        
+    
+        float3 pos;
+        pos = getRandomPointOnSphere(threadId.x, threadId.y,0.03*i);
 
- 
+
+        float3 no = getNormal_filter(pos);
+        float3 fp = pos - filter(pos) * normalize(no);
+
+        int s = 0;
+        while (abs(filter(fp)) > 0.00001 && s < 40)
+        {
+            no = getNormal_filter(fp);
+            fp = fp - normalize(no) * filter(fp);
+            s++;
+        }
+    
+    
+        
+        if (abs(map(fp)) > error)
+            error = abs(map(fp));
+
+        no = getNormal(pos);
+        fp = pos - map(pos) * normalize(no);
+
+        s = 0;
+        while (abs(map(fp)) > 0.00001 && s < 40)
+        {
+            no = getNormal(fp);
+            fp = fp - normalize(no) * map(fp);
+            s++;
+        }
+    
+    
+        
+        if (abs(filter(fp)) > error)
+            error = abs(filter(fp));
+
+    }
     
     tex[threadId.xy] = float4(1, 1 - error, 1 - error, 1);
     errors[threadId.x * testres + threadId.y] = error;
