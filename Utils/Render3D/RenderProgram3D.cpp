@@ -207,6 +207,11 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Program->addDefine("INTERP", std::to_string(interp));
         Program->addDefine("FIELD", std::to_string(field));
 
+        if (field == 2) {
+            Vars["psCb"]["a"] = a;
+            Vars["psCb"]["b"] = b;
+        }
+
         if (isbox) {
             State->setVao(cubeVao);
             pRenderContext->draw(State.get(), Vars.get(), 36, 0);

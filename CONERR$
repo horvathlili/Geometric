@@ -1,4 +1,0 @@
-(Error) mpApiData->pSwapChain->ResizeBuffers(kSwapChainBuffersCount, width, height, desc.BufferDesc.Format, desc.Flags).
-Error! Az alkalmazás érvénytelen hívást intézett. Helytelenek a hívás paraméterei, vagy nem megfelelõ az egyik objektum állapota.
-A részletes hibakeresési üzenetek megtekintéséhez engedélyezze a D3D hibakeresési rétegét.
-

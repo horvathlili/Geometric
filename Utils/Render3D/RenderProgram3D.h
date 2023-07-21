@@ -40,6 +40,9 @@ protected:
     virtual std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext)= 0;
     Texture::SharedPtr testing(RenderContext* pRenderContext);
 
+    float a = 90;
+    float b = 90;
+
 
 public:
     RenderProgram3D();

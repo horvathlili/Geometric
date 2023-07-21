@@ -196,10 +196,22 @@ float sdExact(float3 pos)
         return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
     }
 
+
+    if (abs(kR) < 0.1 || abs(kr) < 0.1)
+    {
+        c = fp + n * 1 / kr;
+        if (kr > 0)  
+            return sign * max(sign * -sdCylinder(pos, r, c, n, d), sdSphere((pos - fp), sr));
+        return sign * max(sign * sdCylinder(pos, r, c, n, d), sdSphere((pos - fp), sr));
+    }
+    
     float dTorus = sdTorus(pos, c, d, r, R);
 
-    //calculate frequently used values
-  
+
+
+    
+   //here i project on the plane of the axis and p-c
+  //
     float3 p2 = pos - c;
     float3 e2 = normalize(d);
     float3 norm = cross(e2, normalize(p2));
@@ -240,25 +252,17 @@ float sdExact(float3 pos)
         cp = float2(-R, 0);
     }
        
-    
+    float sig = 1;
     if (kr > 0)
     {
         norm2 *=  -1;
+        sig *= -1;
     }
+
    
  
-    float a =90;
-    float ra = radians(a);
     
-    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-    {
-        return abs(dTorus);
-    }
-
-
-    //széle számolása
-
-    //széléhez mutató vektor
+    float ra = radians(a);
 
     float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
 
@@ -269,10 +273,212 @@ float sdExact(float3 pos)
 
     float2 s2 = normalize(mul(rot2, norm2));
     float2 ep2 = cp + s2 * r;
-    
-    return 0.5*min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+
+    //here i project on the plane of the normal and dxn
+    float sig2 = 1;
+    if (kR > 0)
+    {
+        sig2 *= -1;
+    }
+    float3 s_p2 = pos - c;
+    float3 s_e1 = normalize(sig2 * n);
+    float3 s_e2 = normalize(cross(s_e1, d));
+
+    float s_px = dot(s_e1, s_p2);
+    float s_py = dot(s_e2, s_p2);
+
+    float2 s_norm2 = normalize(float2(1, 0));
+
+           
+      
    
-}
+    float rb = radians(b);
+
+    if (dot(normalize(float2(s_px, s_py)), s_norm2) > cos(rb))
+    {
+        if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+        {
+        //return abs(dTorus);
+            float de = length(cp - float2(px, py));
+
+            if (de > r && kr > 0)
+            {
+          
+                return min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
+
+
+            }
+       
+            return dTorus * sig;
+        }
+        else
+        {
+            return min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+        }
+
+    }
+
+    return 0.5*length(pos - fp);
+
+    //ha egyikben sincs benne -> szélső körtől távolság
+
+    //forgatni a s_norm2-t erre arra
+     //visszaváltani 3d-be
+    float2x2 s_rot1 = float2x2(cos(rb), -sin(rb), sin(rb), cos(rb));
+
+    float2 s_s1 = normalize(mul(s_rot1, s_norm2));
+    float3 rnorm1 = normalize(s_e1 * s_s1.x + s_e2 * s_s1.y);
+
+    float2x2 s_rot2 = float2x2(cos(-rb), -sin(-rb), sin(-rb), cos(-rb));
+
+    float2 s_s2 = normalize(mul(s_rot2, s_norm2));
+    float3 rnorm2 = normalize(s_e1 * s_s2.x + s_e2 * s_s2.y);   
+
+    //rnorm1 és d-nek a síkjára vetíteni p-cp-t
+
+            float fdist; //ebben lesz az itt kapott távolság
+             p2 = pos - c;
+
+            e2 = normalize(d);
+            e1 = normalize(rnorm1);
+
+            px = dot(e1, p2);
+            py = dot(e2, p2);
+
+    
+            nx = dot(e1, rnorm1);
+            ny = dot(e2, rnorm1);
+
+              norm2 = normalize(float2(nx, ny));
+    
+            dist1 = sqrt((px - R) * (px - R) + py * py) - r;
+            dist2 = sqrt((px + R) * (px + R) + py * py) - r;
+
+            fpp = fp - c;
+            fpx = dot(e1, fpp);
+            fpy = dot(e2, fpp);
+    
+            fd1 = length(float2(R, 0) - float2(fpx, fpy));
+            fd2 = length(float2(-R, 0) - float2(fpx, fpy));
+
+
+   
+            if (fd1 < fd2)
+            {   
+                dTorus = dist1;
+                cp = float2(R, 0);
+                
+            }
+            else
+            {
+                dTorus = dist2;
+                cp = float2(-R, 0);
+            }
+
+            rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
+
+            s1 = normalize(mul(rot1, norm2));
+            ep1 = cp + s1 * r;
+
+            rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
+
+            s2 = normalize(mul(rot2, norm2));
+            ep2 = cp + s2 * r;
+
+            if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+            {
+           
+                float de = length(cp - float2(px, py));
+                if (de > r && kr > 0)
+                {
+          
+                    fdist = min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
+
+
+                }   
+                else
+                {   
+       
+                    fdist = dTorus * sig;
+                }
+            }
+            else
+            {
+       
+
+                fdist = min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+
+            }
+
+
+    //rnorm2 síkjába vetítés
+    e1 = normalize(rnorm2);
+
+    px = dot(e1, p2);
+    py = dot(e2, p2);
+
+    nx = dot(e1, rnorm2);
+    ny = dot(e2, rnorm2);
+
+    norm2 = normalize(float2(nx, ny));
+    
+    dist1 = sqrt((px - R) * (px - R) + py * py) - r;
+    dist2 = sqrt((px + R) * (px + R) + py * py) - r;
+
+   
+    fpp = fp - c;
+    fpx = dot(e1, fpp);
+    fpy = dot(e2, fpp);
+
+    fd1 = length(float2(R, 0) - float2(fpx, fpy));
+    fd2 = length(float2(-R, 0) - float2(fpx, fpy));
+
+    
+    
+    //return dTorus;
+    if (fd1 < fd2)
+    {
+        dTorus = dist1;
+        cp = float2(R, 0);
+
+    }
+    else
+    {
+        dTorus = dist2;
+        cp = float2(-R, 0);
+    }
+
+    rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
+
+    s1 = normalize(mul(rot1, norm2));
+    ep1 = cp + s1 * r;
+
+    rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
+
+    s2 = normalize(mul(rot2, norm2));
+    ep2 = cp + s2 * r;
+    
+    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+    {
+        //return abs(dTorus);
+        float de = length(cp - float2(px, py));
+
+        if (de > r && kr > 0)
+        {
+          
+            return min(fdist, min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py))));
+
+
+        }
+       
+        return min(fdist, dTorus * sig);
+    }
+ 
+    //köröktől távolságok
+     
+    return max(fdist, min(length(float2(px, py) - ep1), length(float2(px, py) - ep2)));
+   
+    }
 
 float noInterp(float3 pos)
 {
@@ -455,25 +661,16 @@ float4 debug(float3 pos, float3 debugpos)
         dTorus = dist2;
         cp = float2(-R, 0);
     }
-
+    float sig = 1;
     if (kr > 0)
     {
         norm2 *= -1;
+        sig *= -1;
     }
     
 
     float a = 90;
     float ra = radians(a);
-    
-    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-    {
-        return abs(dTorus);
-    }
-
-
-    //széle számolása
-
-    //széléhez mutató vektor
 
     float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
 
@@ -484,6 +681,65 @@ float4 debug(float3 pos, float3 debugpos)
 
     float2 s2 = normalize(mul(rot2, norm2));
     float2 ep2 = cp + s2 * r;
+    
+    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
+    {
+        //return abs(dTorus);
+        float de = length(cp - float2(px, py));
+
+        if (de > r && kr > 0)
+        {
+          
+            return min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
+
+
+        }
+
+        {
+
+            float sig2 = 1;
+            if (kR > 0)
+            {
+                sig2 *= -1;
+            }
+            float3 p2 = pos - c;
+            float3 e1 = normalize(sig2 * n);
+            float3 e2 = normalize(cross(e1, d));
+
+            float px = dot(e1, p2);
+            float py = dot(e2, p2);
+
+            float2 norm2 = normalize(float2(1, 0));
+
+           
+      
+            float a = 10;
+            float ra = radians(a);
+
+            if (dot(normalize(float2(px, py)), norm2) > cos(ra))
+            {
+
+            
+                return dTorus * sig;
+            }
+            else
+            {
+                return 1;
+                return max(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+            }
+    
+        }
+        
+        return dTorus * sig;
+    }
+
+
+
+    //széle számolása
+
+    //széléhez mutató vektor
+
+   
     
     return min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
 }

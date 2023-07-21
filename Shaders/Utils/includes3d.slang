@@ -31,6 +31,8 @@ cbuffer psCb
     bool debugging;
     bool showtest;
     int restest;
+    float a;
+    float b;
 };
 
 SamplerState mSampler;

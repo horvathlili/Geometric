@@ -32,6 +32,9 @@ void RenderProgram3DG2::renderGui(Gui::Window* w) {
     w->separator();
     w->radioButtons(bg_interp, interp);
     w->separator();
+    w->slider("a", a, 0.f, 90.f);
+    w->slider("b", b, 0.f, 90.f);
+    w->separator();
     //debugging
     if (w->button(debugging ? "debug on" : "debug off")) {
         debugging = !debugging;
