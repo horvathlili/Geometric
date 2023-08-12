@@ -180,6 +180,12 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         test = false;
     }
 
+    if (csgrun) {
+        std::cout << "3dg1" << std::endl;
+        csgFilter(pRenderContext);
+        csgrun = false;
+    }
+
     if (texturedone) {
 
         float4x4 m = glm::scale(float4x4(1.0), float3(boundingBox - 0.5f * boundingBox / (float)resolution));
@@ -222,6 +228,8 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         }
     }
 }
+
+
 
 void RenderProgram3D::testGui(Gui::Window* t) {
   

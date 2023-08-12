@@ -36,6 +36,11 @@ float sdOctahedron(float3 p, float s)
     return length(float3(q.x, q.y - s + k, q.z - k));
 }
 
+/*float sdlotofcircles(float3 p)
+{
+    
+}*/
+
 float map(float3 p)
 {
     #if SDF == 0

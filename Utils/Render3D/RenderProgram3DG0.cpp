@@ -156,4 +156,7 @@ std::vector<Texture::SharedPtr> RenderProgram3DG0::readFromFile(RenderContext* p
 
 
 
+void RenderProgram3DG0::csgFilter(RenderContext* pRenderContext) {
+
+}
 

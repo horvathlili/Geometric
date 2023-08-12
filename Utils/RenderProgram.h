@@ -6,7 +6,7 @@ class RenderProgram {
 
 protected:
 
-    enum Interpolation { no, trilinear, csg };
+    enum Interpolation { no, trilinear, csg, csg3 };
     uint interp = Interpolation::no;
 
 

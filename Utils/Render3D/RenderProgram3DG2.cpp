@@ -261,4 +261,8 @@ std::vector<Texture::SharedPtr> RenderProgram3DG2::readFromFile(RenderContext* p
 }
 
 
+void RenderProgram3DG2::csgFilter(RenderContext* pRenderContext) {
+    
+}
+
 

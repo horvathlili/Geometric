@@ -6,6 +6,10 @@ RenderProgram3DG1::RenderProgram3DG1() {
     ComputeProgram = ComputeProgramWrapper::create();
     ComputeProgram->createProgram("Samples/GeometricFields/Shaders/Compute/g13d.cs.slang");
 
+    csgProgram = ComputeProgramWrapper::create();
+    csgProgram->createProgram("Samples/GeometricFields/Shaders/Compute/csg3d.cs.slang");
+
+
     bn = 2;
     field = 1;
 }
@@ -16,6 +20,8 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
         retexture = true;
         resolution = sliderRes;
         boundingBox = sliderboundingBox;
+        std::cout << "3dg1" << std::endl;
+
     }
     (w->radioButtons(bg_texsize, texturesize));
 
@@ -32,6 +38,11 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
     }
     if (debugging) {
         w->slider("position", debugpos_3d, -1.0f, 1.0f);
+    }
+    if (w->button("csg test")) {
+     
+        csgrun = true;
+     
     }
    
    
@@ -167,6 +178,89 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::readFromFile(RenderContext* p
     return textures;
 }
 
+void RenderProgram3DG1::csgFilter(RenderContext* pRenderContext) {
+    Texture::SharedPtr pTex = nullptr;
+
+
+   
+    pTex = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+    auto& comp = *csgProgram;
+
+    {
+        Sampler::Desc desc;
+        desc.setFilterMode(Sampler::Filter::Linear, Sampler::Filter::Linear, Sampler::Filter::Linear);
+        mpSampler = Sampler::create(desc);
+    }
+    int rr = resolution - 1;
+    comp["csCb"]["res"] = resolution-1;
+    comp["texture1"] = textures[0];
+    comp["texture2"] = textures[1];
+    comp.allocateStructuredBuffer("csg", rr*rr*rr);
+    comp.allocateStructuredBuffer("csg2", rr * rr * rr);
+   
+    comp.runProgram(pRenderContext, resolution-1, resolution-1,resolution-1);
+
+    //reading data from the gpu
+    auto dataptr = comp.mapBuffer<const float>("csg");
+   
+    csg.resize(rr * rr * rr);
+    csg.assign(dataptr, dataptr + rr*rr*rr);
+    comp.unmapBuffer("csg");
+
+    auto dataptr2 = comp.mapBuffer<const float>("csg2");
+
+    csg2.resize(rr * rr * rr);
+    csg2.assign(dataptr2, dataptr2 + rr * rr * rr);
+    comp.unmapBuffer("csg2");
+
+    int db[13];
+    int db2[13][10];
+
+    for (int i = 0; i <= 12; i++) {
+        db[i] = 0;
+        for (int j = 0; j < 10; j++) {
+            db2[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < rr * rr * rr; i++) {
+   
+            db[(int)csg[i]]++;
+            db2[(int)csg[i]][(int)csg2[i]]++;
+    }
+
+
+    int csum = 0;
+    for (int i = 0; i <= 12; i++) {
+        std::cout << 12-i<<" metszet: "<<db[i] << std::endl;
+
+        csum += db[i];
+
+        if (i == 2 || i == 10) {
+            std::cout << "      egymas mellett: " << db2[i][1] << std::endl;
+            std::cout << "      kulon: " << db2[i][2] << std::endl;
+        }
+        if (i == 3 || i == 9) {
+            std::cout << "      egy csucsbol: " << db2[i][1] << std::endl;
+            std::cout << "      csikban: " << db2[i][2] << std::endl;
+            std::cout << "      2 + 1: " << db2[i][3] << std::endl;
+            std::cout << "      kulon: " << db2[i][4] << std::endl;
+        }
+
+        if (i == 4 || i == 8) {
+            std::cout << "      egy csucsbol + 1 kulon: " << db2[i][1] << std::endl;
+            std::cout << "      egy csucsbol +1: " << db2[i][2] << std::endl;
+            std::cout << "      negyzet: " << db2[i][3] << std::endl;
+            std::cout << "      csik: " << db2[i][4] << std::endl;
+            std::cout << "      csik+1 vagy 2+2: " << db2[i][5] << std::endl;
+            std::cout << "      2+1+1: " << db2[i][6] << std::endl;
+            std::cout << "      kulon: " << db2[i][7] << std::endl;
+        }
+    }
+  
+    std::cout << csum<<std::endl;
+}
 
 
 

@@ -159,5 +159,8 @@
     <ShaderSource Include="snail.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\csg3d.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
   </ItemGroup>
 </Project>

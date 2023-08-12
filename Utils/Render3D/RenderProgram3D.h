@@ -33,6 +33,7 @@ protected:
     std::vector<float> error;
     float avgerror = 0;
     float maxerror = 0;
+    bool csgrun = false;
 
     //methods
     std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) = 0;
@@ -42,6 +43,8 @@ protected:
 
     float a = 90;
     float b = 90;
+
+    virtual void csgFilter(RenderContext* pRenderContext) = 0;
 
 
 public:

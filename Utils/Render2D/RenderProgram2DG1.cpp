@@ -16,6 +16,11 @@ RenderProgram2DG1::RenderProgram2DG1() {
     csg.buttonID = Interpolation::csg;
     csg.sameLine = true;
     bg_interp.push_back(csg);
+    Gui::RadioButton csg3;
+    csg3.label = "csg 3";
+    csg3.buttonID = Interpolation::csg3;
+    csg3.sameLine = true;
+    bg_interp.push_back(csg3);
 
 }
 
