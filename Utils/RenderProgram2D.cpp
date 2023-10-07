@@ -55,6 +55,9 @@ void RenderProgram2D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Vars["texture2"] = textures[1];
         Vars["psCb"]["res"] = resolution;
         Vars["psCb"]["debug"] = debugging;
+        Vars["psCb"]["dx"] = dx;
+        Vars["psCb"]["dy"] = dy;
+        Vars["psCb"]["boundingBox"] = boundingBox;
         Vars["mSampler"] = mpSampler;
         Program->addDefine("SDF", std::to_string(sdf2d));
         Program->addDefine("INTERP", std::to_string(interp));
@@ -98,13 +101,26 @@ void RenderProgram2D::setupGui() {
     horseshoe.label = "Horseshoe";
     horseshoe.buttonID = SDF2d::horseshoe;
     horseshoe.sameLine = true;
+    Gui::RadioButton font;
+    font.label = "Font";
+    font.buttonID = SDF2d::font;
+    font.sameLine = true;
     bg_sdf2d.push_back(circle);
     bg_sdf2d.push_back(moon);
     bg_sdf2d.push_back(star);
     bg_sdf2d.push_back(horseshoe);
-
+    bg_sdf2d.push_back(font);
     RenderProgram::setupGui();
 
+}
+
+void RenderProgram2D::generateFont(std::string text) {
+    
+    
+    ob.initBuffers(text,bw*20.f,bh*20.f);
+    
+    
+    
 }
 
 

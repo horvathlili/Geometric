@@ -17,6 +17,9 @@ cbuffer psCb
 {
     int res;
     bool debug;
+    float boundingBox;
+    float dx;
+    float dy;
 }
 
 Texture2D texture1;

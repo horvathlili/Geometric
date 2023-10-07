@@ -24,6 +24,9 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
     w->radioButtons(bg_texsize, texturesize);
     w->separator();
     w->radioButtons(bg_sdf2d, sdf2d);
+    if (sdf2d == SDF2d::font) {
+        w->textbox("letter", ft);
+    }
     w->slider("resolution", sliderRes, 10, 256);
     w->slider("boundingBox", sliderboundingBox, 2.0f, 10.0f);
     w->separator();
@@ -49,14 +52,22 @@ std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext
        
     }
 
+    generateFont(ft);
+
     auto& comp = *ComputeProgram;
 
     comp["tex"].setUav(pTex->getUAV(0));
     comp["csCb"]["res"] = resolution;
+    
     comp["csCb"]["boundingBox"] = boundingBox;
+    comp["csCb"]["contourN"] = contournum;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf2d));
     comp.allocateStructuredBuffer("data1", resolution * resolution);
-   
+    comp.allocateStructuredBuffer("segments", (int)ob.contours.size() , ob.contours.data(), sizeof(int) * (int)ob.contours.size());
+    comp.allocateStructuredBuffer("controlPoints", (int)ob.controlPoints.size(), ob.controlPoints.data(), sizeof(float) * (int)ob.controlPoints.size());
+    std::vector<int> v; v.push_back(ob.contourNumber);
+    comp.allocateStructuredBuffer("cn",1, v.data(), sizeof(int) );
+
     comp.allocateStructuredBuffer("posdata", resolution * resolution);
 
     comp.runProgram(pRenderContext, resolution, resolution);

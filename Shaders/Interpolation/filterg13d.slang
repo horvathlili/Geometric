@@ -544,6 +544,327 @@ float csg( float3 pos)
 
 }
 
+int4 tetrav(float3 p)
+{
+ 
+    if (p.y <= p.z && p.z <= p.x)
+    {
+         return int4(0, 1, 2, 6);
+    }
+    if (p.z < p.y  && p.y<= p.x)
+    {
+         return int4(0, 1, 5, 6);
+    }
+    if (p.z <= p.x && p.x <=p.y)
+    {
+       return int4(0, 4, 5, 6);
+
+    }
+    if (p.y <= p.x && p.x<= p.z)
+    {
+       
+        return int4(0, 2, 3, 6);
+    }
+    if (p.x <= p.y && p.y<= p.z)
+    {
+       
+        return int4(0,3,7,6);
+    }
+    if (p.x <= p.z && p.z<= p.y)
+    {
+       
+        return int4(0, 4, 7, 6);
+    }
+
+    return int4(0,0,0,0);
+}
+
+float csg2(float3 p)
+{
+    float3 uvw = ((p) / float3(boundingBox) + 0.5) * float3(res-1);
+   
+    float3 pp[8];
+
+    pp[0] = float3(0, 0, 0);
+    pp[1] = float3(1, 0, 0);
+    pp[2] = float3(1, 0, 1);
+    pp[3] = float3(0, 0, 1);
+    pp[4] = float3(0, 1, 0);
+    pp[5] = float3(1, 1, 0);
+    pp[6] = float3(1, 1, 1);
+    pp[7] = float3(0, 1, 1);
+
+    int4 ix = tetrav(uvw - int3(uvw));    
+    
+    float3 fp[4];
+    float3 n[4];
+    fp[0] = texture1[uvw + pp[ix.r]].xyz;
+    n[0] = texture2[uvw + pp[ix.r]].xyz;
+    fp[1] = texture1[uvw + pp[ix.g]].xyz;
+    n[1] = texture2[uvw + pp[ix.g]].xyz;
+    fp[2] = texture1[uvw + pp[ix.b]].xyz;
+    n[2] = texture2[uvw + pp[ix.b]].xyz;
+    fp[3] = texture1[uvw + pp[ix.a]].xyz;
+    n[3] = texture2[uvw + pp[ix.a]].xyz;
+
+    float d[4];
+
+    float e = boundingBox / (float) res * 2.0f;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        d[i] = max(sdSphere(p - fp[i], e), sdPlane(p, n[i], fp[i]));
+
+    }
+
+    int cc[4][4];
+    int c[4] = { 0, 0, 0, 0 };
+    int csum = 0;
+
+    for (int j = 0; j < 4; j++)
+    {
+
+        cc[j][j] = 0;
+        for (int k = j + 1; k < 4; k++)
+        {
+
+            cc[j][k] = 0;
+            cc[k][j] = 0;
+            if (sdPlane(fp[j], n[k], fp[k]) <= 0 && sdPlane(fp[k], n[j], fp[j]) <= 0)
+            {
+                cc[j][k] = 0;
+                cc[k][j] = 0;
+            }
+
+            if (sdPlane(fp[j], n[k], fp[k]) > 0 && sdPlane(fp[k], n[j], fp[j]) > 0)
+            {
+                cc[j][k] = 1;
+                c[j]++;
+                cc[k][j] = 1;
+                c[k]++;
+                csum++;
+            }
+        }
+
+    }
+
+
+    if (csum == 0)
+    {
+        return max(max(d[0], d[1]), max(d[2], d[3]));
+    }
+
+    if (csum == 6)
+    {
+        return min(min(d[0], d[1]), min(d[2], d[3]));
+    }
+
+    if (csum == 1)
+    {
+
+        int i = 0;
+        float dist = -100000;
+        while (i < 4 && c[i] == 0)
+        {
+            i++;
+        }
+
+        for (int j = 0; j < 4; j++)
+        {
+            if (cc[i][j] == 1)
+            {
+                dist = min(d[i], d[j]);
+            }
+        }
+       
+
+        for (int j = 0; j < 4; j++)
+        {
+            if (c[j] == 0)
+            {
+                dist = max(dist, d[j]);
+            }
+        }
+
+        return dist;
+
+    }
+
+    if (csum == 5)
+    {
+
+        int i = 0;
+        float dist = -100000;
+        while (i < 4 && c[i] == 2)
+        {
+            i++;
+        }
+
+        for (int j = 0; j < 4; j++)
+        {
+            if (cc[i][j] == 0)
+            {
+                dist = max(d[i], d[j]);
+            }
+        }
+
+        for (int j = 0; j < 4; j++)
+        {
+            if (c[j] == 2)
+            {
+                dist = min(dist, d[j]);
+            }
+        }
+
+        return dist;
+
+    }
+
+    if (csum == 2) //4 metszet 2 unió
+    {
+
+        //két külön darab vagy egyben van?
+        bool tri = false;
+        int u1, u2, u3,i4;
+        u2 = -1;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (c[i] == 2)
+            {
+                u1 = i;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (cc[i][j] == 1 && u2 == -1)
+                    {
+                        u2 = j;
+                    }
+                    if (cc[i][j] == 1 )
+                    {
+                        u3 = j;
+                    }
+                    if (cc[i][j] == 0 && i!= j)
+                    {
+                        i4 = j;
+                    }
+                }
+
+                tri = true;
+
+            }
+        }
+
+        if (tri == true)
+        {
+            float dist;
+            dist = max(d[u2], d[u3]);
+            dist = min(dist, d[u1]);
+            return max(dist, d[i4]);
+        }
+        else
+        {
+            float dist = -1000000;
+            for (int i = 0; i < 4; i++)
+            {
+                if (c[i] == 1)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (cc[i][j] == 1)
+                        {
+                        
+                            dist = max(dist, min(d[i], d[j]));
+
+                        }
+                    }
+
+                }
+            }
+
+            return dist;
+
+        }
+
+    }
+
+    if (csum == 4) // 2 metszet 4 unió
+    {
+
+        //két külön darab vagy egyben van?
+        bool tri = false;
+        int u1, u2, u3, i4;
+        u2 = -1;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (c[i] == 1) //ehhez 2 metszet tartozik
+            {
+                u1 = i;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (cc[i][j] == 0 && u2 == -1 && i!=j)
+                    {
+                        u2 = j;
+                    }
+                    if (cc[i][j] == 0 && i!= j)
+                    {
+                        u3 = j;
+                    }
+                    if (cc[i][j] == 1 && i != j)
+                    {
+                        i4 = j;
+                    }
+                }
+
+                tri = true;
+
+            }
+        }
+
+        if (tri == true)
+        {
+            float dist;
+            dist = min(d[u2], d[u3]);
+            dist = max(dist, d[u1]);
+            return min(dist, d[i4]);
+        }
+        else
+        {
+            float dist = 1000000;
+            for (int i = 0; i < 4; i++)
+            {
+                if (c[i] == 2)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (cc[i][j] == 0 && i!=j)
+                        {
+                        
+                            dist = min(dist, max(d[i], d[j]));
+
+                        }
+                    }
+
+                }
+            }
+
+            //return max(max(d[0], d[1]), max(d[2], d[3]));
+            return dist;
+
+        }
+
+    }
+
+    if (csum == 3)
+    {
+        
+    }
+    
+    //return 10;
+
+    return max(max(d[0], d[1]), max(d[2], d[3]));
+}
+
 float filter(float3 p)
 {
     #if INTERP == 0
@@ -553,7 +874,7 @@ float filter(float3 p)
     return trilinear(p);
     #endif
     #if INTERP == 2
-    return csg(p);
+    return csg2(p);
     #endif
 
     return 0.0f;

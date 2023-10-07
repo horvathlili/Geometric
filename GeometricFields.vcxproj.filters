@@ -32,6 +32,24 @@
     <ClCompile Include="Source.cpp">
       <Filter>Shaders\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="FreetypeUtils\FreeTypeTest.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FreetypeUtils\FreeTypeWrapper.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FreetypeUtils\Outline.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FreetypeUtils\TextLayout.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FreetypeUtils\WriteLayout.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FreetypeUtils\OutlineBuffer.cpp">
+      <Filter>Freetype utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeometricFields.h" />
@@ -62,6 +80,24 @@
     <ClInclude Include="Utils\Render2D\RenderProgram2DG0.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="FreetypeUtils\FreeTypeTest.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FreetypeUtils\FreeTypeWrapper.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FreetypeUtils\Outline.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FreetypeUtils\TextLayout.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FreetypeUtils\WriteLayout.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FreetypeUtils\OutlineBuffer.h">
+      <Filter>Freetype utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">
@@ -81,6 +117,9 @@
     </Filter>
     <Filter Include="Shaders\Utils">
       <UniqueIdentifier>{ce00807f-9137-4e60-94e3-4fb932e81c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Freetype utils">
+      <UniqueIdentifier>{e9270bdf-2bf2-4665-8941-0b452d4ff307}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +200,21 @@
     </ShaderSource>
     <ShaderSource Include="Shaders\Compute\csg3d.cs.slang">
       <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="bezier.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="bezierOutlineBuffer.slang">
+      <Filter>Shaders\Utils</Filter>
+    </ShaderSource>
+    <ShaderSource Include="tree.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="spike.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="trefoil.slang">
+      <Filter>Shaders\SDF</Filter>
     </ShaderSource>
   </ItemGroup>
 </Project>

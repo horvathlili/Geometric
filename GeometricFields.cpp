@@ -225,7 +225,11 @@ void GeometricFields::onLoad(RenderContext* pRenderContext)
    
     initCamera();
    
+   
 
+    //WriteLayoutAsText(std::cout, textGlyphs, oc, 0, 0);
+
+    
 
 }
 

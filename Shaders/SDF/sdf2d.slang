@@ -2,6 +2,8 @@
 #define SDF 0
 #endif
 
+#include "../../bezierOutlineBuffer.slang"
+
 
 float sdCircle(float2 p, float r)
 {
@@ -55,6 +57,18 @@ float map(float2 p)
     #if SDF == 3
         return sdHorseshoe(p, float2(cos(1.2),sin(1.2)),0.5,float2(0.750,0.2));
     #endif
+     #if SDF == 4
+       float closestD, closestT;
+    float2 closest, _n;
+    int closestID;
+    bool _corner;
+	
+    getClosestSegment(p, closestD, closest, closestID, closestT);
+    bool inside = isInside(p, closest, closestID, closestT, _n, _corner);
+
+     float dist = closestD * (inside ? -1 : 1);
+    return dist;
+    #endif
     return 0.0f;
 }
 
@@ -64,7 +78,17 @@ float2 getNormal(float2 p)
     float2 n;
     n.x = map(p + float2(e, 0)) - map(p - float2(e, 0));
     n.y = map(p + float2(0, e)) - map(p - float2(0, e));
-   
+
+
+#if SDF == 4
+     float closestD, closestT;
+    float2 closest, _n;
+    int closestID;
+    bool _corner;
+	
+    getClosestSegment(p, closestD, closest, closestID, closestT);
+    bool inside = isInside(p, closest, closestID, closestT, n, _corner);
+#endif
     return normalize(n);
 
 }

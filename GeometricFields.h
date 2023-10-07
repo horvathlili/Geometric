@@ -7,6 +7,7 @@
 #include "Utils/Render3D/RenderProgram3DG2.h"
 #include "Utils/Render3D/RenderProgram3DG0.h"
 
+
 using namespace Falcor;
 
 class GeometricFields : public IRenderer
@@ -59,6 +60,8 @@ private:
     Gui::RadioButtonGroup bg_field;
 
     DebugConsole console;
+
+   
 
   
 };

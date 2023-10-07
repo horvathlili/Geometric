@@ -11,6 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FreetypeUtils\FreeTypeTest.cpp" />
+    <ClCompile Include="FreetypeUtils\FreeTypeWrapper.cpp" />
+    <ClCompile Include="FreetypeUtils\Outline.cpp" />
+    <ClCompile Include="FreetypeUtils\OutlineBuffer.cpp" />
+    <ClCompile Include="FreetypeUtils\TextLayout.cpp" />
+    <ClCompile Include="FreetypeUtils\WriteLayout.cpp" />
     <ClCompile Include="GeometricFields.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Utils\ComputeProgramWrapper.cpp" />
@@ -24,6 +30,12 @@
     <ClCompile Include="Utils\RenderProgram2D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FreetypeUtils\FreeTypeTest.h" />
+    <ClInclude Include="FreetypeUtils\FreeTypeWrapper.h" />
+    <ClInclude Include="FreetypeUtils\Outline.h" />
+    <ClInclude Include="FreetypeUtils\OutlineBuffer.h" />
+    <ClInclude Include="FreetypeUtils\TextLayout.h" />
+    <ClInclude Include="FreetypeUtils\WriteLayout.h" />
     <ClInclude Include="GeometricFields.h" />
     <ClInclude Include="Utils\ComputeProgramWrapper.h" />
     <ClInclude Include="Utils\Render2D\RenderProgram2DG0.h" />
@@ -41,6 +53,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ShaderSource Include="bezier.slang" />
+    <ShaderSource Include="bezierOutlineBuffer.slang" />
     <ShaderSource Include="Shaders\3d.ps.slang" />
     <ShaderSource Include="Shaders\3d.vs.slang" />
     <ShaderSource Include="Shaders\Compute\csg3d.cs.slang" />
@@ -67,6 +81,9 @@
     <ShaderSource Include="Shaders\Utils\ray.slang" />
     <ShaderSource Include="Shaders\Utils\spheretrace.slang" />
     <ShaderSource Include="snail.slang" />
+    <ShaderSource Include="spike.slang" />
+    <ShaderSource Include="tree.slang" />
+    <ShaderSource Include="trefoil.slang" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65BCD11B-FC56-4F3D-9976-084933AF4187}</ProjectGuid>
@@ -105,6 +122,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\tdk\Falcor\Source\Samples\GeometricFields\FreeType\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\tdk\Falcor\Source\Samples\GeometricFields\FreeType\release static\vs2015-2022\win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -138,6 +158,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

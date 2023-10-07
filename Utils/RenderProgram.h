@@ -56,6 +56,8 @@ protected:
     std::vector<float4> data3;
     std::vector<float4> posdata;
 
+    
+
     //number of the used buffers
     int bn = 0;
     //dimension of the field
@@ -84,5 +86,10 @@ public:
     virtual void renderGui(Gui::Window* w) = 0;
     void fileGui(Gui::Window* f);
 
-    void setVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao); 
+    void setVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao);
+
+    int contournum;
+    
+    float bw,bh;
+
 };

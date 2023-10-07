@@ -35,6 +35,11 @@ void RenderProgram2DG1::renderGui(Gui::Window* w) {
     w->radioButtons(bg_texsize, texturesize);
     w->separator();
     w->radioButtons(bg_sdf2d, sdf2d);
+    if (sdf2d == SDF2d::font) {
+        w->textbox("letter", ft);
+        w->slider("offset w", bw, 0.f,1.f);
+        w->slider("offset h", bh, 0.f,1.f);
+    }
     w->slider("resolution", sliderRes, 10, 256);
     w->slider("boundingBox", sliderboundingBox, 2.0f, 10.0f);
     w->separator();
@@ -42,7 +47,11 @@ void RenderProgram2DG1::renderGui(Gui::Window* w) {
     w->separator();
     if (w->button(debugging ? "debug on" : "debug off")) {
         debugging = !debugging;
+
+       
     }
+    w->slider("x", dx, 0.f, 1.f);
+    w->slider("y", dy, 0.f, 1.f);
    
 }
 
@@ -60,15 +69,23 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
         pTex2 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
     }
 
+    generateFont(ft);
+
     auto& comp = *ComputeProgram;
 
     comp["tex"].setUav(pTex->getUAV(0));
     comp["tex2"].setUav(pTex2->getUAV(0));
     comp["csCb"]["res"] = resolution;
+  
+    //boundingBox = std::max(fw, fh);
     comp["csCb"]["boundingBox"] = boundingBox;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf2d));
     comp.allocateStructuredBuffer("data1", resolution * resolution);
     comp.allocateStructuredBuffer("data2", resolution * resolution);
+    comp.allocateStructuredBuffer("segments", (int)ob.contours.size(), ob.contours.data(), sizeof(int) * (int)ob.contours.size());
+    comp.allocateStructuredBuffer("controlPoints", (int)ob.controlPoints.size(), ob.controlPoints.data(), sizeof(float) * (int)ob.controlPoints.size());
+    std::vector<int> v; v.push_back(ob.contourNumber);
+    comp.allocateStructuredBuffer("cn", 1, v.data(), sizeof(int));
 
     comp.allocateStructuredBuffer("posdata", resolution * resolution);
 

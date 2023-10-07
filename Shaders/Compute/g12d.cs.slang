@@ -13,6 +13,7 @@ cbuffer csCb
     int sdf;
     int res;
     float boundingBox;
+    //int contourN;
 };
 
 
@@ -40,13 +41,24 @@ float2 getFootpoint(float2 t)
         s++;
     }
 
+    #if SDF==4
+         float closestD, closestT;
+        float2 closest, _n;
+        int closestID;
+        bool _corner;
+	
+         getClosestSegment(t, closestD, closest, closestID, closestT);
+         bool inside = isInside(t, closest, closestID, closestT, n, _corner);
+
+        fp = closest;
+    #endif
     return fp;
 }
 
 float sdLine(float2 p, float2 fp, float2 n)
 {
 
-    return dot(p - fp, n);
+    return dot(float3(p, 1), float3(n, -dot(fp, n)));
 }
 
 [numthreads(8, 8)]
@@ -58,23 +70,36 @@ void main(uint2 threadId : SV_DispatchThreadID)
         return;
 
     float2 t = float2(-boundingBox / 2.0) + (threadId.xy + 0.5) * boundingBox / (float2) res;
-    t *= float2(4, 2.25);
-
-    float2 n = getNormal(t);
+  //  t *= float2(4, 2.25);
+   
+    float2 n = normalize(getNormal(t));
 
     float2 fp = getFootpoint(t);
     
-    float2 nn[25];
-    float2 tp[25];
+    float2 nn[36];
+    float2 tp[36];
 
-    for (int i = -2; i <= 2; i++)
+    int inside = 0;
+    int outside = 0;
+
+    for (int i = -3; i <= 3; i++)
     {
-        for (int j = -2; j <= 2; j++)
+        for (int j = -3; j <= 3; j++)
         {
-            float2 tt = fp + float2(i, j) * 1 / 4.0f * boundingBox / (float2) res * 0.1f;
+            float2 tt = fp + float2(i, j) * 1 / 6.0f * boundingBox / (float2) res * 0.1f;
             
-            nn[(i + 2) * 5 + j +2] = getNormal(tt);
-            tp[(i + 2) * 5 + j + 2] = tt;
+            nn[(i + 3) * 6 + j +3] = getNormal(tt);
+            tp[(i + 3) * 6 + j + 3] = tt;
+
+
+            if (map(tt) > 0)
+            {
+                outside++;
+            }
+            else
+            {
+                inside++;
+            }
 
         }
     }
@@ -86,10 +111,10 @@ void main(uint2 threadId : SV_DispatchThreadID)
     int m2 = 0;
     int h2 = -1;
 
-    for (int i = 0; i < 25; i++)
+   /* for (int i = 0; i < 36; i++)
     {
         int db = 0;
-        for (int j = 0; j < 25; j++)
+        for (int j = 0; j < 36; j++)
         {
             if (equal(nn[i], nn[j], 0.001))
             {
@@ -118,7 +143,7 @@ void main(uint2 threadId : SV_DispatchThreadID)
         n1 = getNormal(fp);
     }
 
-    for (int i = 0; i < 25; i++)
+    for (int i = 0; i < 36; i++)
     {
         if (equal(nn[i], n1, 0.01))
         {
@@ -126,10 +151,10 @@ void main(uint2 threadId : SV_DispatchThreadID)
         }
 
     }
-    for (int i = 0; i < 25; i++)
+    for (int i = 0; i < 36; i++)
     {
         int db = 0;
-        for (int j = 0; j < 25; j++)
+        for (int j = 0; j < 36; j++)
         {
             if (equal(nn[i], nn[j], 0.001) && (nn[i].x != 0 || nn[i].y != 0) && (nn[j].x != 0 || nn[j].y != 0))
             {
@@ -156,16 +181,19 @@ void main(uint2 threadId : SV_DispatchThreadID)
     if (sdLine(fp1, fp2, n2) > 0 && sdLine(fp2, fp1, n1) > 0)
     {
         n1 = 2 * n1;
-    }
+    }*/
 
+    if (inside > outside)
+        n *= 2;
     
     tex[threadId.xy] = float4(fp, n);
-    tex2[threadId.xy] = float4(n1, n2);
+    
+    tex2[threadId.xy] = float4(n, n);
     
     int datai = threadId.x * res + threadId.y;
 
     data1[datai] = float4(fp, n);
-    data2[datai] = float4(n1, n2);
+    data2[datai] = float4(n, n);
     posdata[datai] = float4(threadId.xy, 0, 0);
     
 }

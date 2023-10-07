@@ -4,6 +4,7 @@
 
 #include "head.slang"
 #include "../../snail.slang"
+#include "../../spike.slang"
 
 
 float sdfSphere(float3 p, float s)
@@ -56,7 +57,7 @@ float map(float3 p)
         return headsdf(p);
     #endif
     #if SDF == 4
-        return snailsdf(p);
+        return spikesdf(p);
     #endif
 
 }
