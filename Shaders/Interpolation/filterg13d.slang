@@ -857,7 +857,39 @@ float csg2(float3 p)
 
     if (csum == 3)
     {
-        
+        for (int i = 0; i < 4; i++)
+        {
+            if (c[i] == 3) //3 metszve, utolsó unióban minddel
+            {
+                float dist = -10000000;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (i != j)
+                    {
+                        dist = max(dist, d[j]);
+                    }
+                }
+
+                return min(dist, d[i]);
+
+            }
+
+            if (c[i] == 0) //3 unió, utolsó metszetben minddel
+            {
+                float dist = 10000000;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (i != j)
+                    {
+                        dist = min(dist, d[j]);
+                    }
+                }
+
+                return max(dist, d[i]);
+
+            }
+        }
+
     }
     
     //return 10;
