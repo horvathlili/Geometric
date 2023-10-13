@@ -17,14 +17,9 @@ cbuffer csCb
 };
 
 
-bool equal(float2 n1, float2 n2, float e)
+bool equal(float2 fp1, float2 fp2, float e)
 {
-    /*bool b1 = abs(n1.x - n2.x) < e;
-    bool b2 = abs(n1.y - n2.y) < e;*/
-
-    //return b1 && b2;
-
-    return dot(normalize(n1), normalize(n2)) > cos(e);
+    return abs(fp1.x - fp2.x) < e && abs(fp1.y - fp2.y) < e;
 
 }
 
@@ -35,7 +30,7 @@ float2 getFootpoint(float2 t)
     float2 fp = t - normalize(n) * map(t);
     int s = 0;
 
-    while (abs(map(fp)) > 0.0001 && s < 20)
+    while (abs(map(fp)) > 0.000001 && s < 20)
     {
         fp = fp - normalize(getNormal(fp)) * map(fp);
         s++;
@@ -77,114 +72,49 @@ void main(uint2 threadId : SV_DispatchThreadID)
     float2 fp = getFootpoint(t);
     
     float2 nn[36];
-    float2 tp[36];
+    float2 tp[49];
 
-    int inside = 0;
-    int outside = 0;
-
+  // ez itt totál össze vissza ki kell javítani
     for (int i = -3; i <= 3; i++)
     {
         for (int j = -3; j <= 3; j++)
         {
-            float2 tt = fp + float2(i, j) * 1 / 6.0f * boundingBox / (float2) res * 0.1f;
+            float2 tt = t + float2(i, j) * 1 / 7.0f * boundingBox / (float2) res*0.1;
             
-            nn[(i + 3) * 6 + j +3] = getNormal(tt);
-            tp[(i + 3) * 6 + j + 3] = tt;
-
-
-            if (map(tt) > 0)
-            {
-                outside++;
-            }
-            else
-            {
-                inside++;
-            }
-
+            nn[(i + 3) * 7 + j + 3] = getNormal(tt);
+            tp[(i + 3) * 7 + j + 3] = getFootpoint(tt);
         }
     }
 
-    float2 n1;
+    n = normalize(n);
     
-    int m1 = 0;
-    int h1 = -1;
-    int m2 = 0;
-    int h2 = -1;
+    int db = 0;
 
-   /* for (int i = 0; i < 36; i++)
+    for (int l = 0; l < 49; l++)
     {
-        int db = 0;
-        for (int j = 0; j < 36; j++)
+       
+            
+        if (equal(tp[l], fp, 0.0000001))
         {
-            if (equal(nn[i], nn[j], 0.001))
-            {
-                db++;
-            }
+            db++;
         }
-        if (db > m1)
-        {
-            m1 = db;
-            h1 = i;
-        }
+       
+
     }
 
-    float2 fp1 = fp;
-    float2 fp2 = fp;
+    if (db >=40)
+    {
+        n = float2(10, 10);
+
+        if (map(t) < 0)
+        {
+            n = float2(-10, -10);
+        }
+    }
     
-    float2 n2 = float2(0, 0);
-    if (h1 > -1)
-    {
-        n1 = nn[h1];
-        fp1 = getFootpoint(tp[h1]);
 
-    }
-    else
-    {
-        n1 = getNormal(fp);
-    }
-
-    for (int i = 0; i < 36; i++)
-    {
-        if (equal(nn[i], n1, 0.01))
-        {
-            nn[i] = float2(0, 0);
-        }
-
-    }
-    for (int i = 0; i < 36; i++)
-    {
-        int db = 0;
-        for (int j = 0; j < 36; j++)
-        {
-            if (equal(nn[i], nn[j], 0.001) && (nn[i].x != 0 || nn[i].y != 0) && (nn[j].x != 0 || nn[j].y != 0))
-            {
-                db++;
-            }
-        }
-        if (db > m2)
-        {
-            m2 = db;
-            h2 = i;
-        }
-    }
-
-        if (h2 > -1)
-        {
-            n2 = nn[h2];
-        fp2 = getFootpoint(tp[h2]);
-    }
-        else
-        {
-            n2 = getNormal(fp);
-        }
-
-    if (sdLine(fp1, fp2, n2) > 0 && sdLine(fp2, fp1, n1) > 0)
-    {
-        n1 = 2 * n1;
-    }*/
-
-    if (inside > outside)
-        n *= 2;
+   /* if (inside > outside)
+        n *= 2;*/
     
     tex[threadId.xy] = float4(fp, n);
     

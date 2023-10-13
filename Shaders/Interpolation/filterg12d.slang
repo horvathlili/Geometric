@@ -21,6 +21,16 @@ float noInterp(float2 p)
     float2 pp = (p - 0.5) *boundingBox;
 //    (p - 0.5) * 2 * float2(4, 2.25);
 
+    if (length(n) > 2)
+    {
+       
+        if (n.x == -10)
+            return -length(pp - fp);
+        return length(pp - fp);
+
+       
+    }
+
     //float2 t = float2(-5, -5) + (threadId.xy + 0.5) * 40 / (float2) res;
     //t *= float2(4, 2.25);
 
@@ -31,22 +41,21 @@ float noInterp(float2 p)
 float csgDist(float2 pp, int2 uv)
 {
     float2 fp = texture1[uv].xy;
-    float2 n = texture2[uv].xy;
-    float2 n2 = texture2[uv].zw;
+    float2 n = texture1[uv].zw;
 
-    bool union = false;
-   
-    if (length(n) > 1)
-        union = true;
+    if (length(n) > 4)
+    {
+       
+        if (n.x == -10)
+            return -length(pp - fp);
+        return length(pp - fp);
 
-    //n = texture1[uv].zw;
+       
+    }
+  
+    return sdLine(pp, fp, n);
 
-    n = normalize(n);
-    //return sdLine(pp, fp, n);
-
-    if (!union)
-        return max(sdLine(pp, fp, n), sdLine(pp, fp, n2));
-    return min(sdLine(pp, fp, n), sdLine(pp, fp, n2));
+    
     
 }
 
@@ -97,13 +106,8 @@ int csg2(float2 p, int c1, int c2)
 
     int cc = 0;
 
-        //metszet kell
-    if (csgDist(fp[c1], uvs[c2]) <= 0 && csgDist(fp[c2], uvs[c1]) <= 0)
-    {
-        cc = 0;
 
-    }
-
+    
         //unió kell
     if (csgDist(fp[c1], uvs[c2]) >= 0 && csgDist(fp[c2], uvs[c1]) >= 0)
     {
@@ -111,7 +115,7 @@ int csg2(float2 p, int c1, int c2)
     }
 
         
-    if (csgDist(fp[c1], uvs[c2]) * csgDist(fp[c2], uvs[c1]) < 0)
+   /* if (csgDist(fp[c1], uvs[c2]) * csgDist(fp[c2], uvs[c1]) < 0)
     {
 
             
@@ -148,10 +152,10 @@ int csg2(float2 p, int c1, int c2)
 
            
            
-    }
+    }*/
 
         //mindkettő 0 -> belső vagy külső sarok??? - ezt előre kéne tárolni valahogy
-    if (csgDist(fp[c1], uvs[c2]) == 0 && csgDist(fp[c2], uvs[c1]) == 0)
+   /*if (csgDist(fp[c1], uvs[c2]) == 0 && csgDist(fp[c2], uvs[c1]) == 0)
     {
 
             //return 1;
@@ -171,7 +175,75 @@ int csg2(float2 p, int c1, int c2)
 
           
 
+    }*/
+
+    //vmelyik csúcs
+    if (length(n[c1]) > 4 && length(n[c2]) > 4)
+    {
+        cc = 1;
     }
+    
+    if (length(n[c1]) > 4 || length(n[c2]) > 4)
+    {
+
+        
+
+        if (length(n[c2]) > 4)
+        {
+            cc = 0;
+            if (csgDist(fp[c2], uvs[c1]) >= 0) // a pont a félsíkon kívül van
+            {
+                cc = 1;
+            }
+
+            //a pont kb a félsíkon van
+            if (abs(csgDist(fp[c2], uvs[c1])) < boundingBox / (float) (res - 1) * 0.01)
+            {
+                if (n[c2].x <= 0)
+                {
+                    cc = 0;
+                }
+                else
+                {
+                    cc = 1;
+                }
+
+            }
+
+       
+        }
+
+        if (length(n[c1]) > 4)
+        {
+            cc = 0;
+            if (csgDist(fp[c1], uvs[c2]) >= 0) // a pont a félsíkon kívül van
+            {
+                cc = 1;
+            }
+
+            //a pont kb a félsíkon van
+            if (abs(csgDist(fp[c1], uvs[c2])) < boundingBox / (float) (res - 1) * 0.01)
+            {
+                if (n[c1].x <= 0)
+                {
+                    cc = 0;
+                }
+                else
+                {
+                    cc = 1;
+                }
+                
+            }
+
+       
+        }
+        
+       
+        
+    }
+
+       
+
 
     return cc;
  
@@ -216,8 +288,12 @@ float csg(float2 p)
     for (int i = 0; i < 4; i++)
     {
         c[i] = csg2(p, i, (i + 1) % 4);
+        
     }
 
+  
+
+    
     c[4] = csg2(p, 0, 2);
     c[5] = csg2(p, 1, 3);
 
@@ -657,21 +733,12 @@ float debugplane(float2 pp,float2 p, int i)
     float2 uvs[4] = { uv + float2(0, 0), uv + float2(1, 0), uv + float2(0, 1), uv + float2(1, 1) };
 
     float2 fp = texture1[uvs[i]].xy;
-    float2 n = texture2[uvs[i]].xy;
-    float2 n2 = texture2[uvs[i]].zw;
+    float2 n = texture1[uvs[i]].zw;
 
-    bool union = false;
+    if (length(n) > 4)
+        return 0;
+  
+    return sdLine(pos, fp, n) < 0 ? 1 : 0;
+
    
-    if (length(n) > 1)
-        union = true;
-
-    //n = texture1[uv].zw;
-
-    n = normalize(n);
-   //return sdLine(pos, fp, n) < 0 ? 1 : 0;
-
-    if (!union)
-        return max(sdLine(pos, fp, n), sdLine(pos, fp, n2)) < 0? 1:0;
-    return min(sdLine(pos, fp, n), sdLine(pos, fp, n2))<0?1:0;
-    
 }

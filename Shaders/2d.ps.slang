@@ -69,7 +69,7 @@ PsOut main(psIn input) : SV_TARGET
 
         float4 color = float4(0, 0, 0, 0);
 
-        color += (debugplane(pp, p, 0) * float4(0.25, 0, 0, 1));
+       color += (debugplane(pp, p, 0) * float4(0.25, 0, 0, 1));
         float2 fp0 = texture1[uv].xy;
         color += (debugplane(pp,p, 1) * float4(0, 0.25, 0, 1));
         float2 fp1 = texture1[uv + float2(1, 0)].xy;

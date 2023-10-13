@@ -894,7 +894,7 @@ float csg2(float3 p)
     
     //return 10;
 
-    return max(max(d[0], d[1]), max(d[2], d[3]));
+    return min(max(d[0], d[1]), max(d[2], d[3]));
 }
 
 float filter(float3 p)

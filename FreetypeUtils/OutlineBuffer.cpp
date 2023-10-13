@@ -13,7 +13,7 @@ void OutlineBuffer::initBuffers(std::string text, float bw, float bh)
 	std::vector<Segment> segmentBufferVec;
 
 
-    std::string fontFile = "FreetypeUtils/Assets/theboldfont.ttf";
+    std::string fontFile = "FreetypeUtils/Assets/wmanimals2.ttf";
 
     FTW_Library lib;
     FTW_Face face;
