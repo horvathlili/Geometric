@@ -7,7 +7,7 @@
 
 float sdCircle(float2 p, float r)
 {
-    return length(p) - r;
+    return min(length(p + float2(0.5, 0.4)) - r / 1.5f, min(length(p) - r, length(p - 0.5) - r / 2));
 }
 
 float sdMoon(float2 p, float d, float ra, float rb)
@@ -46,7 +46,7 @@ float sdHorseshoe(float2 p, float2 c,  float r, float2 w)
 float map(float2 p)
 {
     #if SDF == 0
-        return sdCircle(p, 1);
+        return sdCircle(p, 0.3);
     #endif
     #if SDF == 1
         return sdMoon(p, 0.5, 1, 0.8);

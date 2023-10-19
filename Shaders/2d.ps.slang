@@ -47,7 +47,7 @@ PsOut main(psIn input) : SV_TARGET
     if (debug)
     {
         
-        /*float3 col = (a > 0.0) ? float3(0.9, 0.6, 0.3) : float3(0.65, 0.85, 1.0);
+        float3 col = (a > 0.0) ? float3(0.9, 0.6, 0.3) : float3(0.65, 0.85, 1.0);
         col *=1.0 - exp(-6.0 * abs(d));
     col *= 0.8 + 0.2 * cos(150.0 * d);
     col = lerp(col, float3(1.0), 1.0 - smoothstep(0.0, 0.01, abs(d)));
@@ -59,7 +59,7 @@ PsOut main(psIn input) : SV_TARGET
 
        
 
-    o.col = float4(col, 1);*/
+
 
 
         float2 p =  float2(dx, dy);
@@ -115,7 +115,7 @@ PsOut main(psIn input) : SV_TARGET
         {
             o.col = float4(1, 1, 1, 1);
         }
-        
+       // o.col = float4(col, 1);
     }
     return o;
 }
