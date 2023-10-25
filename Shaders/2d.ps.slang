@@ -115,7 +115,7 @@ PsOut main(psIn input) : SV_TARGET
         {
             o.col = float4(1, 1, 1, 1);
         }
-       // o.col = float4(col, 1);
+        o.col = float4(col, 1);
     }
     return o;
 }

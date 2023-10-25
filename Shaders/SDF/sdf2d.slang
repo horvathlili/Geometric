@@ -1,5 +1,5 @@
 #ifndef SDF
-#define SDF 0
+#define SDF 4
 #endif
 
 #include "../../bezierOutlineBuffer.slang"

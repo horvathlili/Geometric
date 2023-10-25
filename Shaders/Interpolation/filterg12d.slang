@@ -72,17 +72,17 @@ float bilinear(float2 p)
     float2 ab = (p * (res - 1) - uv);
     
     float2 fp, n;
-    fp = texture1[uv].xy;
-    n = texture1[uv].zw;
+    fp = texture2[uv].xy;
+    n = normalize(texture2[uv].zw);
     float d1 = sdLine(pos, fp, n);
-    fp = texture1[uv + float2(1, 0)].xy;
-    n = texture1[uv + float2(1, 0)].zw;
+    fp = texture2[uv + float2(1, 0)].xy;
+    n = normalize(texture2[uv + float2(1, 0)].zw);
     float d2 = sdLine(pos, fp, n);;
-    fp = texture1[uv + float2(0, 1)].xy;
-    n = texture1[uv + float2(0, 1)].zw;
+    fp = texture2[uv + float2(0, 1)].xy;
+    n = normalize(texture2[uv + float2(0, 1)].zw);
     float d3 = sdLine(pos, fp, n);;
-    fp = texture1[uv + float2(1, 1)].xy;
-    n = texture1[uv + float2(1, 1)].zw;
+    fp = texture2[uv + float2(1, 1)].xy;
+    n = normalize(texture2[uv + float2(1, 1)].zw);
     float d4 = sdLine(pos, fp, n);;
 
     float d11 = (1 - ab.x) * d1 + ab.x * d2;
@@ -415,6 +415,18 @@ float csg(float2 p,bool points)
     float2 pos = (p - 0.5) * boundingBox;
     float2 ab = (p * float2(res - 1) - uv);
 
+    fps[0] = texture2[uv].xy;
+    ns[0] = texture2[uv].zw;
+   
+    fps[1] = texture2[uv + float2(1, 0)].xy;
+    ns[1] = texture2[uv + float2(1, 0)].zw;
+   
+    fps[2] = texture2[uv + float2(1, 1)].xy;
+    ns[2] = texture2[uv + float2(1, 1)].zw;
+   
+    fps[3] = texture2[uv + float2(0, 1)].xy;
+    ns[3] = texture2[uv + float2(0, 1)].zw;
+
     if (points)
     {
         fps[0] = texture1[uv].xy;
@@ -429,20 +441,7 @@ float csg(float2 p,bool points)
         fps[3] = texture1[uv + float2(0, 1)].xy;
         ns[3] = texture1[uv + float2(0, 1)].zw;
     }
-    else //csak félsíkok (csúcsokban lehet hibás)
-    {
-        fps[0] = texture2[uv].xy;
-        ns[0] = texture2[uv].zw;
    
-        fps[1] = texture2[uv + float2(1, 0)].xy;
-        ns[1] = texture2[uv + float2(1, 0)].zw;
-   
-        fps[2] = texture2[uv + float2(1, 1)].xy;
-        ns[2] = texture2[uv + float2(1, 1)].zw;
-   
-        fps[3] = texture2[uv + float2(0, 1)].xy;
-        ns[3] = texture2[uv + float2(0, 1)].zw;
-    }
    
     float2 pp[4] = { float2(0, 0), float2(1, 0), float2(1, 1), float2(0, 1) };
 
@@ -681,17 +680,7 @@ float debugplane(float2 pp,float2 p, int i)
     int2 uv = p * int2(res - 1);
     float2 pos = (pp - 0.5) * boundingBox;
 
-    fps[0] = texture1[uv].xy;
-    ns[0] = texture1[uv].zw;
    
-    fps[1] = texture1[uv + float2(1, 0)].xy;
-    ns[1] = texture1[uv + float2(1, 0)].zw;
-   
-    fps[2] = texture1[uv + float2(1, 1)].xy;
-    ns[2] = texture1[uv + float2(1, 1)].zw;
-   
-    fps[3] = texture1[uv + float2(0, 1)].xy;
-    ns[3] = texture1[uv + float2(0, 1)].zw;
     
     //float2 uvs[4] = { uv + float2(0, 0), uv + float2(1, 0), uv + float2(0, 1), uv + float2(1, 1) };
 

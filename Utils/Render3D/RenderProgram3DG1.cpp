@@ -1,4 +1,6 @@
 #include "RenderProgram3DG1.h"
+#include <vector>
+#include "../../Eigen/Dense"
 
 
 RenderProgram3DG1::RenderProgram3DG1() {
@@ -48,6 +50,40 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
    
 }
 
+std::vector<float> getPseudoInverse1(float boundingbox, int res) {
+
+    Eigen::MatrixXf m(27, 4);
+
+    std::vector<float> ret;
+
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            for (int k = -1; k <= 1; k++) {
+
+                float3 x = float3(i, j, k) * (float)boundingbox / (float)res * 0.6f;
+
+                m((i + 1) * 9 + (j + 1) * 3 + (k + 1), 0) = x.x;
+                m((i + 1) * 9 + (j + 1) * 3 + (k + 1), 1) = x.y;
+                m((i + 1) * 9 + (j + 1) * 3 + (k + 1), 2) = x.z;
+                m((i + 1) * 9 + (j + 1) * 3 + (k + 1), 3) = 1.0;
+
+            }
+        }
+    }
+
+
+
+    Eigen::MatrixXf result = (m.transpose() * m).inverse() * m.transpose();
+    
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 27; j++) {
+            ret.push_back(result(i, j));
+        }
+    }
+
+    return ret;
+}
+
 
 std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext* pRenderContext) {
     Texture::SharedPtr pTexfp = nullptr;
@@ -65,10 +101,13 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
 
     auto& comp = *ComputeProgram;
 
+    std::vector<float> x0 = getPseudoInverse1(boundingBox, resolution);
+
     comp["texfp"].setUav(pTexfp->getUAV(0));
     comp["texn"].setUav(pTexn->getUAV(0));
     comp["csCb"]["res"] = resolution;
     comp["csCb"]["boundingBox"] = boundingBox;
+    comp.allocateStructuredBuffer("x0", 108, x0.data(), sizeof(float) * 108);
     comp.getProgram()->addDefine("SDF", std::to_string(sdf3d));
     comp.allocateStructuredBuffer("data1", resolution * resolution * resolution);
     comp.allocateStructuredBuffer("data2", resolution * resolution * resolution);
@@ -98,6 +137,8 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
 
     return textures;
 }
+
+
 
 std::vector<Texture::SharedPtr> RenderProgram3DG1::readFromFile(RenderContext* pRenderContext) {
     fileerror = false;
@@ -159,10 +200,13 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::readFromFile(RenderContext* p
 
     auto& comp = *readProgram;
 
+    std::vector<float> x0 = getPseudoInverse1(boundingBox, resolution);
+
     comp.getProgram()->addDefine("FIELD", std::to_string(field));
     comp["texfp"].setUav(pTexfpr->getUAV(0));
     comp["texn"].setUav(pTexdR->getUAV(0));
     comp["csCb"]["res"] = resolution;
+    comp.allocateStructuredBuffer("x0", 108, x0.data(), sizeof(float) * 108);
     comp.allocateStructuredBuffer("data1", r * r * r, data1.data(), sizeof(float4) * r * r * r);
     comp.allocateStructuredBuffer("data2", r * r * r, data2.data(), sizeof(float4) * r * r * r);
     comp.allocateStructuredBuffer("posdata", r * r * r, posdata.data(), sizeof(float4) * r * r * r);
