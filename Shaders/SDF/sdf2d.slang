@@ -58,7 +58,7 @@ float map(float2 p)
         return sdHorseshoe(p, float2(cos(1.2),sin(1.2)),0.5,float2(0.750,0.2));
     #endif
      #if SDF == 4
-       float closestD, closestT;
+    float closestD, closestT;
     float2 closest, _n;
     int closestID;
     bool _corner;
@@ -66,7 +66,7 @@ float map(float2 p)
     getClosestSegment(p, closestD, closest, closestID, closestT);
     bool inside = isInside(p, closest, closestID, closestT, _n, _corner);
 
-     float dist = closestD * (inside ? -1 : 1);
+    float dist = closestD * (inside ? -1 : 1);
     return dist;
     #endif
     return 0.0f;

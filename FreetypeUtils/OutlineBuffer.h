@@ -13,6 +13,6 @@ public:
     std::vector<float> controlPoints;
     std::vector<int> contours;
     int contourNumber;
-	void initBuffers(std::string text, float bw, float bh);
+	void initBuffers(std::string text,std::string fontf, float bw, float bh);
 	
 };

@@ -13,7 +13,6 @@ cbuffer csCb
     int sdf;
     int res;
     float boundingBox;
-    //int contourN;
 };
 
 
@@ -65,15 +64,14 @@ void main(uint2 threadId : SV_DispatchThreadID)
         return;
 
     float2 t = float2(-boundingBox / 2.0) + (threadId.xy + 0.5) * boundingBox / (float2) res;
-  //  t *= float2(4, 2.25);
-   
+    
     float2 n = normalize(getNormal(t));
     float2 no = n;
 
     float2 fp = getFootpoint(t);
     float2 fpo = fp;
     
-    float2 nn[36];
+    float2 nn[49];
     float2 tp[49];
 
     int inside = 0;

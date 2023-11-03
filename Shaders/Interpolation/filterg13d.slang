@@ -36,13 +36,18 @@ float noInterp(float3 pos)
 {
     float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
 
+    
+
     float4 t1 = texture1[uvw];
     float4 t2 = texture2[uvw];
 
+    //return t1.r * pos.x + t1.g * pos.y + t1.b * pos.z + t1.a;
+
+
     float sr = boundingBox / (float) res * 2.0f;
 
-    return sdCircle(pos, t2.xyz, t1.xyz,sr);
-    
+    //return sdCircle(pos, t2.xyz, t1.xyz,sr);
+    return sdPlane(pos, normalize(t2.xyz), t1.xyz);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -63,9 +68,12 @@ float getTexture(float3 uvw, float3 pos)
     float4 t1 = texture1[uvw];
     float4 t2 = texture2[uvw];
 
+
+    //return t1.r * pos.x + t1.g * pos.y + t1.b * pos.z + t1.a;
+
     float sr = boundingBox / (float) res * 2.0f;
 
-    return sdCircle(pos, t2.xyz, t1.xyz, sr);
+    //return sdCircle(pos, t2.xyz, t1.xyz, sr);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -73,7 +81,11 @@ float getTexture(float3 uvw, float3 pos)
 
 float trilinear( float3 pos)
 {
-    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * float3(res - 1);
+    float3 pp = ((pos) / float3(boundingBox) + 0.5);
+    
+    float3 fuvw = clamp(pp * (float(res)) - 0.5, 0, float(res) - 1);
+    int3 uvw = clamp(fuvw, 0, res - 2);
+   
     
     float d000 = getTexture(uvw, pos);
     float d100 = getTexture(uvw + float3(1, 0, 0), pos);
@@ -84,8 +96,10 @@ float trilinear( float3 pos)
     float d011 = getTexture(uvw + float3(0, 1, 1), pos);
     float d111 = getTexture(uvw + float3(1, 1, 1), pos);
 
-    float a1 = uvw.x - (int) uvw.x;
+    float a1 = fuvw.x - uvw.x;
     float ha1 = 6 * pow(a1, 5) - 15 * pow(a1, 4) + 10 * pow(a1, 3);
+   ha1 = -2 * pow(a1, 3) + 3 * pow(a1, 2);
+    ha1 = a1;
   
     float d00 = d000 * (1 - ha1) + d100 * ha1;
     float d01 = d001 * (1 - ha1) + d101 * ha1;
@@ -93,14 +107,19 @@ float trilinear( float3 pos)
     float d11 = d011 * (1 - ha1) + d111 * ha1;
   
 
-    float a2 = uvw.y - (int) uvw.y;
+    float a2 = fuvw.y -  uvw.y;
     float ha2 = 6 * pow(a2, 5) - 15 * pow(a2, 4) + 10 * pow(a2, 3);
+    ha2 = -2 * pow(a2, 3) + 3 * pow(a2, 2);
+
+    ha2 = a2;
     float d0 = d00 * (1 - ha2) + d10 * ha2;
     float d1 = d01 * (1 - ha2) + d11 * ha2;
    
 
-    float a3 = uvw.z - (int) uvw.z;
+    float a3 = fuvw.z - uvw.z;
     float ha3 = 6 * pow(a3, 5) - 15 * pow(a3, 4) + 10 * pow(a3, 3);
+    ha3 = -2 * pow(a3, 3) + 3 * pow(a3, 2);
+    ha3 = a3;
     return  (d0 * (1 - ha3) + d1 * ha3);
 
     return 0;
@@ -116,11 +135,14 @@ float opSmoothIntersection
     return lerp(d2, d1, h) + k * h * (1.0 - h);
 }
 
-float blend(float3 fp1, float3 n1, float3 fp2, float3 n2, float3 pos)
+float opSmoothUnion
+    (
+    float d1, float d2, float k)
 {
-    return opSmoothIntersection(sdPlane(pos, n1, fp1), sdPlane(pos, n2, fp2),0.005);
-
+    return -opSmoothIntersection(-d1, -d2, k);
 }
+
+
 
 int4 tetrav(float3 p)
 {
@@ -159,7 +181,10 @@ int4 tetrav(float3 p)
 
 float csg2(float3 p)
 {
-    float3 uvw = ((p) / float3(boundingBox) + 0.5) * float3(res-1);
+    float3 p1 = ((p) / float3(boundingBox) + 0.5);
+    
+    float3 fuvw = clamp(p1 * (float(res)) - 0.5, 0, float(res) - 1);
+    int3 uvw = clamp(fuvw, 0, res - 2);
    
     float3 pp[8];
 
@@ -172,7 +197,7 @@ float csg2(float3 p)
     pp[6] = float3(1, 1, 1);
     pp[7] = float3(0, 1, 1);
 
-    int4 ix = tetrav(uvw - int3(uvw));    
+    int4 ix = tetrav(fuvw - int3(uvw));    
     
     float3 fp[4];
     float3 n[4];
@@ -246,7 +271,7 @@ float csg2(float3 p)
 
     if (csum == 6)
     {
-        return min(min(d[0], d[1]), min(d[2], d[3]));
+        return opSmoothUnion(opSmoothUnion(d[0], d[1],k), opSmoothUnion(d[2], d[3],k),k);
     }
 
     if (csum == 1)
@@ -263,7 +288,7 @@ float csg2(float3 p)
         {
             if (cc[i][j] == 1)
             {
-                dist = min(d[i], d[j]);
+                dist = opSmoothUnion(d[i], d[j],k);
             }
         }
        
@@ -302,7 +327,7 @@ float csg2(float3 p)
         {
             if (c[j] == 2)
             {
-                dist = -opSmoothIntersection(-dist, -d[j],k);
+                dist = opSmoothUnion(dist, d[j],k);
             }
         }
 
@@ -348,7 +373,7 @@ float csg2(float3 p)
         {
             float dist;
             dist = opSmoothIntersection(d[u2], d[u3],k);
-            dist = -opSmoothIntersection(-dist, -d[u1],k);
+            dist = opSmoothUnion(dist, d[u1],k);
             return opSmoothIntersection(dist, d[i4],k);
         }
         else
@@ -414,9 +439,9 @@ float csg2(float3 p)
         if (tri == true)
         {
             float dist;
-            dist = min(d[u2], d[u3]);
-            dist = max(dist, d[u1]);
-            return min(dist, d[i4]);
+            dist = opSmoothUnion(d[u2], d[u3],k);
+            dist = opSmoothIntersection(dist, d[u1],k);
+            return opSmoothUnion(dist, d[i4],k);
         }
         else
         {
@@ -430,7 +455,7 @@ float csg2(float3 p)
                         if (cc[i][j] == 0 && i!=j)
                         {
                         
-                            dist = min(dist, max(d[i], d[j]));
+                            dist = opSmoothUnion(dist, opSmoothIntersection(d[i], d[j],k),k);
 
                         }
                     }
@@ -485,7 +510,6 @@ float csg2(float3 p)
     //return 10;
     return trilinear(p);
     
-    return max(max(d[0], d[1]), max(d[2], d[3]));
 }
 
 float filter(float3 p)
@@ -511,29 +535,30 @@ float getDifference(float3 p1, float3 p2,)
 
 float3 getNormal_filter(float3 pos)
 {
-    float e = 0.00001;
+    
+    float e = 0.001;
     float3 n;
 
-    {
+    
         float3 p1 = pos + float3(e, 0, 0);
         float3 p2 = pos - float3(e, 0, 0);
 
         n.x = getDifference(p1, p2);
-    }
-    {
-        float3 p1 = pos + float3(0, e, 0);
-       
-        float3 p2 = pos - float3(0, e, 0);
-   
-        n.y = getDifference(p1, p2);
-    }
-    {
     
-        float3 p1 = pos + float3(0, 0, e);
+    
+        float3 p12 = pos + float3(0, e, 0);
+       
+        float3 p22 = pos - float3(0, e, 0);
+   
+        n.y = getDifference(p12, p22);
+    
+    
+    
+        float3 p13 = pos + float3(0, 0, e);
      
-        float3 p2 = pos - float3(0, 0, e);
+        float3 p23 = pos - float3(0, 0, e);
       
-        n.z = getDifference(p1, p2);
-    }
-    return n;
+        n.z = getDifference(p13, p23);
+    
+    return normalize(n);
 }

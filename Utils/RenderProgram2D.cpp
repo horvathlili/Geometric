@@ -53,8 +53,10 @@ void RenderProgram2D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
 
         Vars["texture1"] = textures[0];
         Vars["texture2"] = textures[1];
+        Vars["textureCSG"] = textures[2];
         Vars["psCb"]["res"] = resolution;
         Vars["psCb"]["debug"] = debugging;
+        Vars["psCb"]["originalsdf"] = originalsdf;
         Vars["psCb"]["dx"] = dx;
         Vars["psCb"]["dy"] = dy;
         Vars["psCb"]["boundingBox"] = boundingBox;
@@ -62,7 +64,10 @@ void RenderProgram2D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Program->addDefine("SDF", std::to_string(sdf2d));
         Program->addDefine("INTERP", std::to_string(interp));
         Program->addDefine("FIELD", std::to_string(field));
+
         State->setVao(pVao);
+
+        
         pRenderContext->draw(State.get(), Vars.get(), 4, 0);
     }
 }
@@ -117,7 +122,7 @@ void RenderProgram2D::setupGui() {
 void RenderProgram2D::generateFont(std::string text) {
     
     
-    ob.initBuffers(text,bw*20.f,bh*20.f);
+    ob.initBuffers(text,fontf,bw*20.f,bh*20.f);
     
     
     

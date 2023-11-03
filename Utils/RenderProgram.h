@@ -28,6 +28,7 @@ protected:
     GraphicsVars::SharedPtr Vars;
     GraphicsState::SharedPtr State;
     ComputeProgramWrapper::SharedPtr ComputeProgram;
+    ComputeProgramWrapper::SharedPtr CSGProgram;
 
     //generate texture
     bool retexture = false;
@@ -47,6 +48,7 @@ protected:
 
     //debug
     bool debugging = false;
+    bool originalsdf = false;
 
     bool isOutOfBox(float3 pos);
 

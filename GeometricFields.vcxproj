@@ -58,6 +58,7 @@
     <ShaderSource Include="Shaders\3d.ps.slang" />
     <ShaderSource Include="Shaders\3d.vs.slang" />
     <ShaderSource Include="Shaders\Compute\csg3d.cs.slang" />
+    <ShaderSource Include="Shaders\Compute\csgprecalc.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g02d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g03d.cs.slang" />
     <ShaderSource Include="Shaders\Compute\g12d.cs.slang" />

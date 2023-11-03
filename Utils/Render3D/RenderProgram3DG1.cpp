@@ -89,15 +89,17 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
     Texture::SharedPtr pTexfp = nullptr;
     Texture::SharedPtr pTexn = nullptr;
 
-    if (texturesize == 0) {
-        pTexfp = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexn = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+    ResourceFormat format = ResourceFormat::RGBA16Float;
 
-    }
     if (texturesize == 1) {
-        pTexfp = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexn = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        format = ResourceFormat::RGBA32Float;
     }
+
+   
+        pTexfp = Texture::create3D(resolution, resolution, resolution,format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        pTexn = Texture::create3D(resolution, resolution, resolution, format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+   
 
     auto& comp = *ComputeProgram;
 

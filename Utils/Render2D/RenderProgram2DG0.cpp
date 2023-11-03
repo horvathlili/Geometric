@@ -26,6 +26,7 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
     w->radioButtons(bg_sdf2d, sdf2d);
     if (sdf2d == SDF2d::font) {
         w->textbox("letter", ft);
+        w->textbox("fontfile", fontf);
     }
     w->slider("resolution", sliderRes, 10, 256);
     w->slider("boundingBox", sliderboundingBox, 2.0f, 10.0f);
@@ -35,6 +36,9 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
     if (w->button(debugging ? "debug on" : "debug off")) {
         debugging = !debugging;
     }
+    if (w->button(originalsdf ? "show original" : "hide original")) {
+        originalsdf = !originalsdf;
+    }
 }
 
 
@@ -43,14 +47,13 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
 std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext* pRenderContext) {
     Texture::SharedPtr pTex = nullptr;
 
-    if (texturesize == 0) {
-        pTex = Texture::create2D(resolution, resolution, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-       
-    }
+    ResourceFormat format = ResourceFormat::RGBA16Float;
+
     if (texturesize == 1) {
-        pTex = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-       
+        format = ResourceFormat::RGBA32Float;
     }
+
+    pTex = Texture::create2D(resolution, resolution,format , 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
     generateFont(ft);
 

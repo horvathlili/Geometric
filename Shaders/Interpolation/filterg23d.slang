@@ -482,8 +482,14 @@ float sdExact(float3 pos)
 
 float noInterp(float3 pos)
 {
+
+    float3 p1 = ((pos) / float3(boundingBox) + 0.5);
     
-    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res-0.00001);
+    float3 fuvw = clamp(p1 * (float(res)) - 0.5, 0, float(res) - 1);
+    int3 uvw = clamp(fuvw, 0, res - 2);
+  
+    
+    //float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res-0.00001);
 
     float3 texelcenter = -float3(boundingBox / 2.0f)+((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
 
@@ -499,7 +505,7 @@ float noInterp(float3 pos)
     //calculating the normalvector for the representation conversion
     float3 n = texture3[uvw].xyz;
 
-    float sr = boundingBox / (float) res  ;
+    float sr = boundingBox / (float) res;
    
     return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, sr);
 }
@@ -746,7 +752,9 @@ float4 debug(float3 pos, float3 debugpos)
 
 
 float getTexture(float3 uvw, float3 pos)
-{    
+{
+  
+    
     float4 t1 = texture1[uvw];
     float4 t2 = texture2[uvw];
 
@@ -765,8 +773,11 @@ float getTexture(float3 uvw, float3 pos)
 
 float trilinear(float3 pos)
 {
-    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res-1);
-
+    float3 p1 = ((pos) / float3(boundingBox) + 0.5);
+    
+    float3 fuvw = clamp(p1 * (float(res)) - 0.5, 0, float(res) - 1);
+    int3 uvw = clamp(fuvw, 0, res - 2);
+    
     float d000 = getTexture(uvw, pos);
     float d100 = getTexture(uvw + float3(1, 0, 0), pos);
     float d010 = getTexture(uvw + float3(0, 1, 0), pos);
@@ -776,20 +787,20 @@ float trilinear(float3 pos)
     float d011 = getTexture(uvw + float3(0, 1, 1), pos);
     float d111 = getTexture(uvw + float3(1, 1, 1), pos);
 
-    float a1 = uvw.x - (int) uvw.x;
+    float a1 = fuvw.x - (int) uvw.x;
     float ha1 = 6 * pow(a1, 5) - 15 * pow(a1, 4) + 10 * pow(a1, 3);
     float d00 = d000 * (1 - ha1) + d100 * ha1;
     float d01 = d001 * (1 - ha1) + d101 * ha1;
     float d10 = d010 * (1 - ha1) + d110 * ha1;
     float d11 = d011 * (1 - ha1) + d111 * ha1;
 
-    float a2 = uvw.y - (int) uvw.y;
+    float a2 = fuvw.y - (int) uvw.y;
     float ha2 = 6 * pow(a2, 5) - 15 * pow(a2, 4) + 10 * pow(a2, 3);
     float d0 = d00 * (1 - ha2) + d10 * ha2;
     float d1 = d01 * (1 - ha2) + d11 * ha2;
 
 
-    float a3 = uvw.z - (int) uvw.z;
+    float a3 = fuvw.z - (int) uvw.z;
     float ha3 = 6 * pow(a3, 5) - 15 * pow(a3, 4) + 10 * pow(a3, 3);
     return d0 * (1 - ha3) + d1 * ha3;
 

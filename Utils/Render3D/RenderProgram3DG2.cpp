@@ -109,18 +109,19 @@ std::vector<float> getPseudoInverse(float finegridsize, int finegridres) {
 std::vector<Texture::SharedPtr> RenderProgram3DG2::generateTexture(RenderContext* pRenderContext) {
     Texture::SharedPtr pTexfpr = nullptr; //footpoint and smaller cuvature
     Texture::SharedPtr pTexdR = nullptr;  //axis and bigger curvature
-    Texture::SharedPtr pTexn = nullptr;  //axis and bigger curvature
+    Texture::SharedPtr pTexn = nullptr; 
 
-    if (texturesize == 0) {
-        pTexfpr = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexdR = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexn = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-    }
+    ResourceFormat format = ResourceFormat::RGBA16Float;
+
     if (texturesize == 1) {
-        pTexfpr = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexdR = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTexn = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        format = ResourceFormat::RGBA32Float;
     }
+
+   
+        pTexfpr = Texture::create3D(resolution, resolution, resolution, format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        pTexdR = Texture::create3D(resolution, resolution, resolution, format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        pTexn = Texture::create3D(resolution, resolution, resolution, format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+   
 
     float finegridsize = boundingBox / (float)resolution * finegridSize;
     number = finegridRes * 2 + 1;

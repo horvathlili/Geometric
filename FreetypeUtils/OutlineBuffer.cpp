@@ -7,13 +7,13 @@ struct Segment { Falcor::float2 A, B, C; };
 
 static void pushSegmentToBuffer(const Outline::Segment&, std::vector<Segment>&, float bw, float bh);
 
-void OutlineBuffer::initBuffers(std::string text, float bw, float bh)
+void OutlineBuffer::initBuffers(std::string text,std::string fontf, float bw, float bh)
 {
 	std::vector<SegmentPointer> segmentPointerBufferVec; // indexes into segmentBuffer
 	std::vector<Segment> segmentBufferVec;
 
 
-    std::string fontFile = "FreetypeUtils/Assets/wmanimals2.ttf";
+    std::string fontFile = fontf;
 
     FTW_Library lib;
     FTW_Face face;

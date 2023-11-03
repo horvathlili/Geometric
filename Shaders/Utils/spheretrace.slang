@@ -8,7 +8,7 @@ float4 sphereTrace(float3 pixelpos)
     else
     {
         r.v = normalize(pixelpos - eye.xyz);
-        r.p = pixelpos + 0.001 * r.v;
+        r.p = pixelpos;
         
     }
 
@@ -32,7 +32,7 @@ float4 sphereTrace(float3 pixelpos)
         t +=h;
     }
 
-    float3 hitpos = r.p + t * r.v;
+    float3 hitpos = pos;
     float hit = 0;
     if (i >= n || isOutOfBox(pos))
         hit = 1;

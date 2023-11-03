@@ -124,15 +124,17 @@ std::vector<Texture::SharedPtr> RenderProgram3DG0::readFromFile(RenderContext* p
     tfile.close();
 
     Texture::SharedPtr pTexfpr = nullptr; //footpoint and smaller cuvature
-  
-     if (texturesize == 0) {
-        pTexfpr = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
-      }
+    ResourceFormat format = ResourceFormat::RGBA16Float;
+
     if (texturesize == 1) {
-        pTexfpr = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        format = ResourceFormat::RGBA32Float;
+    }
 
-       }
+ 
+        pTexfpr = Texture::create3D(resolution, resolution, resolution, format, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+  
 
     auto& comp = *readProgram;
 

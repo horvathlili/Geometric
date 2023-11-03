@@ -216,5 +216,8 @@
     <ShaderSource Include="trefoil.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
+    <ShaderSource Include="Shaders\Compute\csgprecalc.cs.slang">
+      <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
   </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@ protected:
     void generateFont(std::string text);
 
     OutlineBuffer ob;
-
+    std::string fontf = "FreetypeUtils/Assets/wmanimals2.ttf";
     
 
 public:

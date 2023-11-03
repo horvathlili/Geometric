@@ -17,6 +17,7 @@ cbuffer psCb
 {
     int res;
     bool debug;
+    bool originalsdf;
     float boundingBox;
     float dx;
     float dy;
@@ -24,5 +25,7 @@ cbuffer psCb
 
 Texture2D texture1;
 Texture2D texture2;
+Texture2D textureCSG;
+
 
 SamplerState mSampler;

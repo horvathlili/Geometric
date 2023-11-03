@@ -52,7 +52,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     n = getNormal(fp);
 
 
-    /*float3 delta = boundingBox / float3(res);
+    float3 delta = boundingBox / float3(res);
     
     float3 xi = (threadId.xyz + 0.5) * delta - boundingBox / 2.0;
 
@@ -88,16 +88,10 @@ void main(uint3 threadId : SV_DispatchThreadID)
         ai[l] = aa;
     }
 
-    float3 n = ai.rgb;
-    float3 fp = pos - distP(ai,pos) * n;
+    //n = normalize(ai.rgb);
+    //fp = pos - distP(ai,pos) * n;
 
-    int s = 0;
-    while (abs(distP(ai,fp)) > 0.000001 && s < 40)
-    {
-       
-        fp = fp - n * distP(ai,fp);
-        s++;
-    }*/
+    
 
 
   

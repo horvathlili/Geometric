@@ -7,6 +7,11 @@ RenderProgram2DG1::RenderProgram2DG1() {
     ComputeProgram = ComputeProgramWrapper::create();
     ComputeProgram->createProgram("Samples/GeometricFields/Shaders/Compute/g12d.cs.slang");
 
+
+    CSGProgram = ComputeProgramWrapper::create();
+    CSGProgram->createProgram("Samples/GeometricFields/Shaders/Compute/csgprecalc.cs.slang");
+
+
     field = 1;
 
     bn = 2;
@@ -39,6 +44,7 @@ void RenderProgram2DG1::renderGui(Gui::Window* w) {
         w->textbox("letter", ft);
         w->slider("offset w", bw, 0.f,1.f);
         w->slider("offset h", bh, 0.f,1.f);
+        w->textbox("fontfile", fontf);
     }
     w->slider("resolution", sliderRes, 10, 256);
     w->slider("boundingBox", sliderboundingBox, 2.0f, 10.0f);
@@ -50,8 +56,14 @@ void RenderProgram2DG1::renderGui(Gui::Window* w) {
 
        
     }
-    w->slider("x", dx, 0.f, 1.f);
-    w->slider("y", dy, 0.f, 1.f);
+    if (debugging) {
+        w->slider("x", dx, 0.f, 1.f);
+        w->slider("y", dy, 0.f, 1.f);
+    }
+
+    if (w->button(originalsdf ? "hide original" : "show original")) {
+        originalsdf = !originalsdf;
+    }
    
 }
 
@@ -59,15 +71,17 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
     Texture::SharedPtr pTex = nullptr;
     Texture::SharedPtr pTex2 = nullptr;
 
-    if (texturesize == 0) {
-        pTex = Texture::create2D(resolution, resolution, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTex2 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+    Texture::SharedPtr pTexCSG = nullptr;
 
-    }
+    ResourceFormat format = ResourceFormat::RGBA16Float;
+
     if (texturesize == 1) {
-        pTex = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTex2 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        format = ResourceFormat::RGBA32Float;
     }
+
+    pTex = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+    pTex2 = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+    pTexCSG = Texture::create2D(resolution-1, resolution-1, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
     generateFont(ft);
 
@@ -76,8 +90,6 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
     comp["tex"].setUav(pTex->getUAV(0));
     comp["tex2"].setUav(pTex2->getUAV(0));
     comp["csCb"]["res"] = resolution;
-  
-    //boundingBox = std::max(fw, fh);
     comp["csCb"]["boundingBox"] = boundingBox;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf2d));
     comp.allocateStructuredBuffer("data1", resolution * resolution);
@@ -108,6 +120,18 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
     textures.push_back(pTex);
     textures.push_back(pTex2);
 
+    //calculating csg trees
+
+    auto& comp2 = *CSGProgram;
+
+    comp2["texcsg"].setUav(pTexCSG->getUAV(0));
+    comp2["texture2"] = textures[1];
+    comp2["csCb"]["res"] = resolution;
+    comp2["csCb"]["boundingBox"] = boundingBox;
+
+    comp2.runProgram(pRenderContext, resolution-1, resolution-1);
+
+    textures.push_back(pTexCSG);
     return textures;
 }
 
@@ -161,16 +185,21 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::readFromFile(RenderContext* p
 
     Texture::SharedPtr pTex1 = nullptr;
     Texture::SharedPtr pTex2 = nullptr;
-   
-    if (texturesize == 0) {
-        pTex1 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTex2 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
-    }
+    ResourceFormat format = ResourceFormat::RGBA16Float;
+
     if (texturesize == 1) {
-        pTex1 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-        pTex2 = Texture::create2D(resolution, resolution, ResourceFormat::RGBA32Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        format = ResourceFormat::RGBA32Float;
     }
+
+   
+
+   
+   
+        pTex1 = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+        pTex2 = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+   
 
     auto& comp = *readProgram;
 

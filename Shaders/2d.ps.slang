@@ -16,6 +16,78 @@ struct PsOut
 };
 
 
+float4 debug1(float a,float d)
+{
+    float3 col = (a > 0.0) ? float3(0.9, 0.6, 0.3) : float3(0.65, 0.85, 1.0);
+    col *= 1.0 - exp(-6.0 * abs(d));
+    col *= 0.8 + 0.2 * cos(150.0 * d);
+    col = lerp(col, float3(1.0), 1.0 - smoothstep(0.0, 0.01, abs(d)));
+
+    return float4(col, 1);
+   
+}
+
+/*float4 debug2(float2 pp,float  a)
+{
+    float2 p = float2(dx, dy);
+       
+    int2 uv = p * int2(res - 1);
+    
+    float4 color = float4(0, 0, 0, 0);
+
+    float4 col = float4(a,a,a, 1);
+    
+    color += (debugplane(pp, p, 0) * float4(0.25, 0, 0, 1));
+    float2 fp0 = texture1[uv].xy;
+    color += (debugplane(pp, p, 1) * float4(0, 0.25, 0, 1));
+    float2 fp1 = texture1[uv + float2(1, 0)].xy;
+    color += (debugplane(pp, p, 2) * float4(0, 0, 0.25, 1));
+    float2 fp2 = texture1[uv + float2(1, 1)].xy;
+    color += (debugplane(pp, p, 3) * float4(0.25, 0.25, 0.25, 1));
+    float2 fp3 = texture1[uv + float2(0, 1)].xy;
+        
+    if (col.r == 1)
+    {
+            
+        if (color.a != 0)
+        {
+            col = 0.5 * color;
+        }
+    }
+    else
+    {
+        col = color;
+    }
+
+    float2 pp2 = (pp - 0.5) * boundingBox;
+        
+    if (length(pp - p) < 0.01)
+    {
+        col = float4(1, 0, 0, 1);
+    }
+
+    if (length(pp2 - fp0) < 0.01)
+    {
+        col = float4(1, 0, 0, 1);
+    }
+
+    if (length(pp2 - fp1) < 0.01)
+    {
+        col = float4(0, 1, 0, 1);
+    }
+    if (length(pp2 - fp2) < 0.01)
+    {
+        col = float4(0, 0, 1, 1);
+    }
+    if (length(pp2 - fp3) < 0.01)
+    {
+        col = float4(1, 1, 1, 1);
+    }
+
+    return col;
+}
+    
+*/
 
 PsOut main(psIn input) : SV_TARGET
 {
@@ -31,91 +103,25 @@ PsOut main(psIn input) : SV_TARGET
     else
     {
        // float d = filter(pp);
-       
-
-
-
-     
-
+        o.col = float4(a, a, a, 1);
         
-        o.col = float4(a,a,a, 1);
-        
-    }
+    
 
     
 
-    if (debug)
-    {
-        
-        float3 col = (a > 0.0) ? float3(0.9, 0.6, 0.3) : float3(0.65, 0.85, 1.0);
-        col *=1.0 - exp(-6.0 * abs(d));
-    col *= 0.8 + 0.2 * cos(150.0 * d);
-    col = lerp(col, float3(1.0), 1.0 - smoothstep(0.0, 0.01, abs(d)));
+        if (debug)
+        {          
+          o.col =debug1(a,d);
 
-       
-        
-
-        
-
-       
-
-
-
-
-        float2 p =  float2(dx, dy);
-       
-        int2 uv = p * int2(res - 1);
-       // p *=   float2(2, 1.125);
-
-        float4 color = float4(0, 0, 0, 0);
-
-       color += (debugplane(pp, p, 0) * float4(0.25, 0, 0, 1));
-        float2 fp0 = texture1[uv].xy;
-        color += (debugplane(pp,p, 1) * float4(0, 0.25, 0, 1));
-        float2 fp1 = texture1[uv + float2(1, 0)].xy;
-        color += (debugplane(pp,p, 2) * float4(0, 0, 0.25, 1));
-        float2 fp2 = texture1[uv + float2(1, 1)].xy;
-        color += (debugplane(pp,p, 3) * float4(0.25, 0.25, 0.25, 1));
-        float2 fp3 = texture1[uv + float2(0, 1)].xy;
-        
-        if (o.col.r == 1)
-        {
-            
-            if (color.a != 0)
-            {
-                o.col = 0.5 * color;
-            }
-        }
-        else
-        {
-            o.col = color;
         }
 
-        float2 pp2 = (pp - 0.5) * boundingBox;
-        
-        if (length(pp- p) < 0.01)
+        if (originalsdf)
         {
-            o.col = float4(1, 0, 0, 1);
-        }
 
-        if (length(pp2 - fp0) < 0.01)
-        {
-            o.col = float4(1, 0, 0, 1);
+            float2 ppos = (pp - 0.5) * boundingBox;
+            a = map(ppos) > 0 ? 0: 1;
+            o.col = float4(a, a, a, 1);
         }
-
-        if (length(pp2 - fp1) < 0.01)
-        {
-            o.col = float4(0, 1, 0, 1);
-        }
-        if (length(pp2 - fp2) < 0.01)
-        {
-            o.col = float4(0, 0, 1, 1);
-        }
-        if (length(pp2 - fp3) < 0.01)
-        {
-            o.col = float4(1, 1, 1, 1);
-        }
-        o.col = float4(col, 1);
     }
     return o;
 }
