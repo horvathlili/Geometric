@@ -40,7 +40,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     n = getNormal(pos);
     fp = pos - map(pos) * n;
 
-    int s = 0;
+   int s = 0;
     while (abs(map(fp)) > 0.000001 && s < 40)
     {
         n = getNormal(fp);
@@ -51,50 +51,8 @@ void main(uint3 threadId : SV_DispatchThreadID)
 
     n = getNormal(fp);
 
-
-    float3 delta = boundingBox / float3(res);
-    
-    float3 xi = (threadId.xyz + 0.5) * delta - boundingBox / 2.0;
-
-
-    float f[27];
-    
-    for (int i = -1; i <= 1; i++)
-    {
-        for (int j = -1; j <= 1; j++)
-        {
-            for (int k = -1; k <= 1; k++)
-            {
-                float3 x = xi + float3(i, j, k) * 0.6f * delta;
-
-                f[(i + 1) * 9 + (j + 1) * 3 + (k + 1)] = map(x);
-            }
-        }
-    }
-
-    float4 ai;
-
-    for (int l = 0; l < 4; l++)
-    {
-        float aa = 0;
-        for (int j = 0; j < 27; j++)
-        {
-            aa += x0[l * 27 + j] * f[j];
-        }
-        if (l == 3)
-        {
-            aa -= dot(ai.rgb, xi);
-        }
-        ai[l] = aa;
-    }
-
-    //n = normalize(ai.rgb);
-    //fp = pos - distP(ai,pos) * n;
-
-    
-
-
-  
+    int is = map(pos) < 0 ? -1 : 1;
+    n = normalize(pos - fp) * is;
 
 
     int datai = threadId.x * res * res + threadId.y * res + threadId.z;

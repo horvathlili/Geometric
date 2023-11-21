@@ -46,7 +46,7 @@ float noInterp(float3 pos)
 
     float sr = boundingBox / (float) res * 2.0f;
 
-    //return sdCircle(pos, t2.xyz, t1.xyz,sr);
+    return sdCircle(pos, t2.xyz, t1.xyz,sr);
     return sdPlane(pos, normalize(t2.xyz), t1.xyz);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
@@ -73,7 +73,7 @@ float getTexture(float3 uvw, float3 pos)
 
     float sr = boundingBox / (float) res * 2.0f;
 
-    //return sdCircle(pos, t2.xyz, t1.xyz, sr);
+   return sdCircle(pos, t2.xyz, t1.xyz, sr);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -215,16 +215,19 @@ float csg2(float3 p)
     float e = boundingBox / (float) res * 2.0f;
 
     float k = 0.005;
+    k = 0;
+    float sr = boundingBox / (float) res * 2.0f;
     
     for (int i = 0; i < 4; i++)
     {
         d[i] = max(sdSphere(p - fp[i], e), sdPlane(p, n[i], fp[i]));
-
+        d[i] = sdCircle(p, n[i], fp[i], sr);
     }
 
     int cc[4][4];
     int c[4] = { 0, 0, 0, 0 };
     int csum = 0;
+   
 
     for (int j = 0; j < 4; j++)
     {
@@ -536,7 +539,7 @@ float getDifference(float3 p1, float3 p2,)
 float3 getNormal_filter(float3 pos)
 {
     
-    float e = 0.001;
+    float e = 0.000001;
     float3 n;
 
     

@@ -94,7 +94,7 @@ void RenderProgram3D::setCubeVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao) {
     cubeVbo = vbo;
 }
 
-Texture::SharedPtr RenderProgram3D::testing(RenderContext* pRenderContext) {
+void RenderProgram3D::testing(RenderContext* pRenderContext) {
     Texture::SharedPtr pTex= nullptr;
       
     pTex = Texture::create2D(testres,testres, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
@@ -113,7 +113,7 @@ Texture::SharedPtr RenderProgram3D::testing(RenderContext* pRenderContext) {
         mpSampler = Sampler::create(desc);
     }
 
-    comp["tex"].setUav(pTex->getUAV(0));
+    testres = 217;
     comp["csCb"]["testres"] = testres;
    comp["texture1"] = textures[0];
    comp["texture2"] = textures[1];
@@ -130,28 +130,43 @@ Texture::SharedPtr RenderProgram3D::testing(RenderContext* pRenderContext) {
     comp.getProgram()->addDefine("SDF", std::to_string(sdf3d));
     comp.getProgram()->addDefine("FIELD", std::to_string(field));
     comp.getProgram()->addDefine("INTERP", std::to_string(interp));
-    comp.allocateStructuredBuffer("errors", testres*testres);
-    comp.allocateStructuredBuffer("randoms", testres * testres,randoms.data(), sizeof(float2)*testres * testres);
+    comp.allocateStructuredBuffer("seconderrors", testres*testres);
+    comp.allocateStructuredBuffer("firsterrors", testres * testres);
+    comp.allocateStructuredBuffer("inferrors", testres * testres);
 
     comp.runProgram(pRenderContext, testres,testres);
 
     //reading data from the gpu
-    auto dataptr = comp.mapBuffer<const float>("errors");
-    error.resize(testres*testres);
-    error.assign(dataptr, dataptr + testres*testres);
-    comp.unmapBuffer("errors");
-    avgerror = 0;
-    maxerror = 0;
+    auto dataptr = comp.mapBuffer<const float>("seconderrors");
+    seconderror.resize(testres*testres);
+    seconderror.assign(dataptr, dataptr + testres*testres);
+    comp.unmapBuffer("seconderrors");
+    auto dataptrf = comp.mapBuffer<const float>("firsterrors");
+    firsterror.resize(testres * testres);
+    firsterror.assign(dataptrf, dataptrf + testres * testres);
+    comp.unmapBuffer("firsterrors");
+    auto dataptri = comp.mapBuffer<const float>("inferrors");
+    inferror.resize(testres * testres);
+    inferror.assign(dataptri, dataptri + testres * testres);
+    comp.unmapBuffer("inferrors");
+
+    secondnorm = 0;
+    firstnorm = 0;
+    infnorm = 0;
+
     for (int i = 0; i < testres*testres; i++) {
-        if (abs(error[i]) > maxerror) {
-            maxerror = abs(error[i]);
+       
+        secondnorm += seconderror[i];
+        firstnorm += firsterror[i];
+
+        if (inferror[i] > infnorm) {
+            infnorm = inferror[i];
         }
-        avgerror += abs(error[i]);
     }
 
-    avgerror /= ((float)testres * (float)testres);
+    secondnorm = sqrt(secondnorm);
 
-    return pTex;
+   
 }
 
 void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) {
@@ -173,7 +188,7 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
     }
 
     if (test && texturedone) {
-        testTexture = testing(pRenderContext);
+      testing(pRenderContext);
         test = false;
     }
     else {
@@ -237,7 +252,9 @@ void RenderProgram3D::testGui(Gui::Window* t) {
         test = true;
     }
     t->slider("Test resolution", testres, 1, 512);
-    t->text("Max error: " + std::to_string(maxerror));
-    t->text("Average error: " + std::to_string(avgerror));
+    t->text("second norm: " + std::to_string(secondnorm));
+    t->text("first norm: " + std::to_string(firstnorm));
+    t->text("inf norm: " + std::to_string(infnorm));
+
 
 }

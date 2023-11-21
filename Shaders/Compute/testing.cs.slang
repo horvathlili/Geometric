@@ -2,47 +2,19 @@
 #include "../SDF/sdf3d.slang"
 
 
-RWTexture2D<float4> tex;
 
-RWStructuredBuffer<float> errors;
-RWStructuredBuffer<float2> randoms;
+
+RWStructuredBuffer<float> seconderrors;
+RWStructuredBuffer<float> firsterrors;
+RWStructuredBuffer<float> inferrors;
 
 cbuffer csCb
 {
     int testres;
 };
 
-float3 getRandomPointOnSphere(float i, float j,float r)
-{
-    float k = i * testres + j;
-    float N= testres * testres;
-    
-
-    float h = 1 - ((2 * k - 1) / N);
-
-    float u = acos(h);
-
-    float L = sqrt(N * radians(180));
-
-    float v = L * u;
-
-    float3 psphere = float3(r*sin(v) * cos(u), r*cos(v), r*sin(v) * sin(u));
-
-    return psphere;
-
-}
 
 
-float3 getPointOnSphere(int i, int j)
-{
-    float u = radians((i + 0.5) * 360 / (float) (testres + 1));
-    float v = radians((j + 0.5) * 180 / (float) (testres + 1));
-
-    float3 psphere = float3( sin(v) * cos(u),  cos(v),  sin(v) * sin(u));
-
-    return psphere;
-
-}
 
 float3 getQueryPoint(float3 p)
 {
@@ -61,51 +33,30 @@ void main(uint2 threadId : SV_DispatchThreadID)
         return;
 
     float error = 0;
+    float seconderror = 0;
+    float firsterror = 0;
+    float inferror = 0;
 
-    for (int i = 1; i < 50; i++)
+    for (int i = 0; i < testres; i++)
     {
-        
-    
-        float3 pos;
-        pos = getRandomPointOnSphere(threadId.x, threadId.y,0.03*i);
+
+        float3 pos = getQueryPoint(float3(threadId.xy, i));
+        error = abs(map(pos) - filter(pos));
+
+        seconderror += (error * error);
 
 
-        float3 no = getNormal_filter(pos);
-        float3 fp = pos - filter(pos) * normalize(no);
+        firsterror += error;
 
-        int s = 0;
-        while (abs(filter(fp)) > 0.00001 && s < 40)
+        if (error > inferror)
         {
-            no = getNormal_filter(fp);
-            fp = fp - normalize(no) * filter(fp);
-            s++;
+            inferror = error;
         }
-    
-    
-        
-        if (abs(map(fp)) > error)
-            error = abs(map(fp));
-
-        no = getNormal(pos);
-        fp = pos - map(pos) * normalize(no);
-
-        s = 0;
-        while (abs(map(fp)) > 0.00001 && s < 40)
-        {
-            no = getNormal(fp);
-            fp = fp - normalize(no) * map(fp);
-            s++;
-        }
-    
-    
-        
-        if (abs(filter(fp)) > error)
-            error = abs(filter(fp));
-
     }
     
-    tex[threadId.xy] = float4(1, 1 - error, 1 - error, 1);
-    errors[threadId.x * testres + threadId.y] = error;
-   
+    
+    seconderrors[threadId.x * testres + threadId.y] = seconderror;
+    firsterrors[threadId.x * testres + threadId.y] = firsterror;
+    inferrors[threadId.x * testres + threadId.y] = inferror;
 }
 

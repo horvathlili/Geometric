@@ -195,9 +195,6 @@
     <ShaderSource Include="Shaders\SDF\head.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
-    <ShaderSource Include="snail.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
     <ShaderSource Include="Shaders\Compute\csg3d.cs.slang">
       <Filter>Shaders\Compute</Filter>
     </ShaderSource>
@@ -207,17 +204,32 @@
     <ShaderSource Include="bezierOutlineBuffer.slang">
       <Filter>Shaders\Utils</Filter>
     </ShaderSource>
-    <ShaderSource Include="tree.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
-    <ShaderSource Include="spike.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
-    <ShaderSource Include="trefoil.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
     <ShaderSource Include="Shaders\Compute\csgprecalc.cs.slang">
       <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\helix.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\julia.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\key.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\knob.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\snail.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\spike.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\temple.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="Shaders\SDF\vase.slang">
+      <Filter>Shaders\SDF</Filter>
     </ShaderSource>
   </ItemGroup>
 </Project>

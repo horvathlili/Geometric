@@ -75,16 +75,20 @@
     <ShaderSource Include="Shaders\Interpolation\filterg13d.slang" />
     <ShaderSource Include="Shaders\Interpolation\filterg23d.slang" />
     <ShaderSource Include="Shaders\SDF\head.slang" />
+    <ShaderSource Include="Shaders\SDF\helix.slang" />
+    <ShaderSource Include="Shaders\SDF\julia.slang" />
+    <ShaderSource Include="Shaders\SDF\key.slang" />
+    <ShaderSource Include="Shaders\SDF\knob.slang" />
     <ShaderSource Include="Shaders\SDF\sdf2d.slang" />
     <ShaderSource Include="Shaders\SDF\sdf3d.slang" />
+    <ShaderSource Include="Shaders\SDF\snail.slang" />
+    <ShaderSource Include="Shaders\SDF\spike.slang" />
+    <ShaderSource Include="Shaders\SDF\temple.slang" />
+    <ShaderSource Include="Shaders\SDF\vase.slang" />
     <ShaderSource Include="Shaders\Utils\includes2d.slang" />
     <ShaderSource Include="Shaders\Utils\includes3d.slang" />
     <ShaderSource Include="Shaders\Utils\ray.slang" />
     <ShaderSource Include="Shaders\Utils\spheretrace.slang" />
-    <ShaderSource Include="snail.slang" />
-    <ShaderSource Include="spike.slang" />
-    <ShaderSource Include="tree.slang" />
-    <ShaderSource Include="trefoil.slang" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65BCD11B-FC56-4F3D-9976-084933AF4187}</ProjectGuid>

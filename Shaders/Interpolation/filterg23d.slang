@@ -41,6 +41,12 @@ float sdTorus(float3 p, float3 center, float3 axis, float r, float R)
     float dist1 = sqrt((px - R) * (px - R) + py * py) - r;
     float dist2 = sqrt((px + R) * (px + R) + py * py) - r;
 
+    if (dist1 * dist2 < 0) //egymásbalóg a tórusz
+    {
+    
+        return min(dist1, dist2);
+    }
+    
     if (abs(dist1) <= abs(dist2))
         return dist1;
     else
@@ -49,15 +55,8 @@ float sdTorus(float3 p, float3 center, float3 axis, float r, float R)
 
 }
 
-float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis,float kr, float kR, float3 n, float sr)
+float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float kr, float kR, float3 n, float inside, float sr)
 {
-    
-    float sign = 1;
-    if (dot(n, normalize(fp - p)) > 0 && length(fp - p) < 0.1)
-    {
-        sign = -1;
-    }
-    
     
 
     //smaller
@@ -77,54 +76,163 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis,float 
     //calculate center
     float3 c = fp + n / kR;
 
+    //return sdPlane(p, n, fp);
+
     //calculate frequently used values
     float dSphere = sdSphere((p - fp), sr);
     float dTorus = sdTorus(p, c, axis, r, R);
 
-    //if the curvature is small use a plane
-    if (abs(kr) < 0.01 && abs(kR) < 0.1)
+    if (R < 0.01)
     {
-        return max(sdPlane(p, normalize(sign * n), fp), dSphere);
+        R = 0;
+        float3 c = fp + n / kr;
+        dTorus = sdSphere(p - c, r);
     }
 
-
-    //cylinder
-    if (abs(kR) < 0.1 || abs(kr) < 0.1)
+    float sign = 1;
+    if (sdPlane(p, n, fp) < 0)
     {
-        c = fp + n * 1 / kr;
-        if (kr > 0)  
-         return sign * max(sign * -sdCylinder(p, r, c, n, axis),dSphere);
-        return sign * max(sign * sdCylinder(p, r, c, n, axis), dSphere);
-    }
-    
-    if (dot(n, normalize(fp - p)) > 0 && length(fp - p)<0.1)
-    {
-        dTorus = -dTorus;
         sign = -1;
     }
-    //return sdPlane(p, n, fp);
-        
 
+    //if the curvature is small use a plane
+    if (abs(kr) < 0.1 && abs(kR) < 0.1)
+    {
+        return sign * max(sign * sdPlane(p, normalize(n), fp), dSphere);
+    }
+
+    sign = 1;
+
+   
+    
+    //cylinder
+    if (abs(kR) < 0.1 && abs(kr) > 0.1)
+    {
+        c = fp + n * 1 / kr;
+
+        if (sdPlane(p, n, fp) < 0)
+        {
+            sign = -1;
+
+     
+
+        
+        }
+       
+
+        float dCylinder = sdCylinder(p, r, c, n, axis);
+        
+        if (kr > 0)
+        {
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(sign * -dCylinder, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
+           
+            return sign * max(sign * -dCylinder, dSphere);
+        }
+        
+        if (r <= sr)
+            return sign * max(sign * dCylinder, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
+           
+        return sign * max(sign * dCylinder, dSphere);
+    }
+
+
+    
+
+    sign = 1;
+   
+
+    if (sdPlane(p, n, fp) < 0)
+    {
+        sign = -1;
+
+     
+
+        
+    }
+   /* else
+    {
+        /*if (kR > 0)
+        {
+            if (kr <= 0 && dTorus < 0 && length(p - fp) < sr)
+            {
+                sign = -1;
+
+            }
+
+        
+            if (kr > 0 && dTorus > 0 && length(p - fp) < sr)
+            {
+                sign = -1;
+
+            }
+        }
+    }*/
+
+    if (kr <= 0 && dTorus > 0 && length(p - fp) < 2 * sr)
+    {
+        sign = 1;
+
+    }
+
+        
+    if (kr > 0 && dTorus < 0 && length(p - fp) < 2 * sr)
+    {
+        sign = 1;
+
+    }
+
+    if (kr <= 0 && dTorus < 0 && length(p - fp) < 2 * sr)
+    {
+        sign = -1;
+
+    }
+
+        
+    if (kr > 0 && dTorus > 0 && length(p - fp) < 2 * sr)
+    {
+        sign = -1;
+
+    }
+    
+    if (r < sr)
+        sign = 1;
+    
+    if (length(fp - p) > sr)
+    {
+        sign = inside;
+    }
+    
+    
+    dTorus *= sign;
+
+  
+    
+   
+    
+    
     //different cases of the torus
     if (kr > 0)
     {
        
         if (kR <= 0)
         {
-            if ( r <= sr) //the radius is smaller than the intersecting sphere
-                return sign * max(-dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(-dTorus, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
            
             return sign * max(-dTorus, dSphere);
         }
         else
         {
-           
+          
             return sign * max(-dTorus, dSphere);
         }
 
     }
     else
     {
+
+        
         if (kR < 0)
         {
             
@@ -132,21 +240,33 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis,float 
         }
         else
         {
-            if (r <= 2*sr) //the radius is smaller than the intersecting sphere
-                return sign * max(dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(dTorus, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
            
-            return sign * max(dTorus,  dSphere);
+            return sign * max(dTorus, dSphere);
            
            
-        }            
+        }
     }
 
-    return 1;
+    //return 1;
 }
 
-float sdExact(float3 pos)
+
+float noInterp(float3 pos)
 {
-    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res - 0.00001);
+
+    //float3 p1 = ((pos) / float3(boundingBox) + 0.5);
+
+    float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
+
+    
+    
+   // float3 fuvw = clamp(p1 * (float(res)) - 0.5, 0, float(res) - 1);
+    //int3 uvw = clamp(fuvw, 0, res - 2);
+  
+    
+    //float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res-0.00001);
 
     float3 texelcenter = -float3(boundingBox / 2.0f) + ((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
 
@@ -156,364 +276,22 @@ float sdExact(float3 pos)
 
     float3 fp = t1.xyz;
     float3 d = normalize(t2.xyz);
-    float kr = t1.w;
-    float kR = t2.w;
-
-    //calculating the normalvector for the representation conversion
-    float3 n = texture3[uvw].xyz;
-
-    float sr = boundingBox / (float) res;
-    float sign = 1;
-    if (dot(n, normalize(fp - pos)) > 0 && length(fp - pos) < 0.1)
-    {
-        sign = -1;
-    }
-    
-    
-
-    //smaller
-    float r = 1.0f / abs(kr);
-    float R;
-
-    //bigger (according to the orientation of the torus)
-    if (kr * kR > 0)
-    {
-        R = 1.0f / abs(kR) - r;
-    }
-    else
-    {
-        R = 1.0f / abs(kR) + r;
-    }
-
-    float3 cc = fp - n * r;
-    
-
-    //calculate center
-    float3 c = fp + n / kR;
-
-    if (abs(kr) < 0.01 && abs(kR) < 0.1)
-    {
-        return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
-    }
-
-
-    if (abs(kR) < 0.1 || abs(kr) < 0.1)
-    {
-        c = fp + n * 1 / kr;
-        if (kr > 0)  
-            return sign * max(sign * -sdCylinder(pos, r, c, n, d), sdSphere((pos - fp), sr));
-        return sign * max(sign * sdCylinder(pos, r, c, n, d), sdSphere((pos - fp), sr));
-    }
-    
-    float dTorus = sdTorus(pos, c, d, r, R);
-
-
-
-    
-   //here i project on the plane of the axis and p-c
-  //
-    float3 p2 = pos - c;
-    float3 e2 = normalize(d);
-    float3 norm = cross(e2, normalize(p2));
-
-    float3 e1 = normalize(cross(e2, norm));
-
-    float px = dot(e1, p2);
-    float py = dot(e2, p2);
-
-    float nx = dot(e1, n);
-    float ny = dot(e2, n);
-
-    float2 norm2 = normalize(float2(nx, ny));
-    
-    float dist1 = sqrt((px-R) * (px - R) + py * py) - r;
-    float dist2 = sqrt((px + R) * (px + R) + py * py) - r;
-
-   
-    float3 fpp = fp - c;
-    float fpx = dot(e1, fpp);
-    float fpy = dot(e2, fpp);
-
-    float fd1 = length(float2(R, 0) - float2(fpx, fpy));
-    float fd2 = length(float2(-R, 0) - float2(fpx, fpy));
-
-    float2 cp;
-    
-    //return dTorus;
-    if (fd1 < fd2)
-    {
-        dTorus = dist1;
-        cp = float2(R, 0);
-
-    }
-    else
-    {
-        dTorus = dist2;
-        cp = float2(-R, 0);
-    }
-       
-    float sig = 1;
-    if (kr > 0)
-    {
-        norm2 *=  -1;
-        sig *= -1;
-    }
-
-   
- 
-    
-    float ra = radians(a);
-
-    float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
-
-    float2 s1 = normalize(mul(rot1, norm2));
-    float2 ep1 = cp + s1 * r;
-
-    float2x2 rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
-
-    float2 s2 = normalize(mul(rot2, norm2));
-    float2 ep2 = cp + s2 * r;
-
-    //here i project on the plane of the normal and dxn
-    float sig2 = 1;
-    if (kR > 0)
-    {
-        sig2 *= -1;
-    }
-    float3 s_p2 = pos - c;
-    float3 s_e1 = normalize(sig2 * n);
-    float3 s_e2 = normalize(cross(s_e1, d));
-
-    float s_px = dot(s_e1, s_p2);
-    float s_py = dot(s_e2, s_p2);
-
-    float2 s_norm2 = normalize(float2(1, 0));
-
-           
-      
-   
-    float rb = radians(b);
-
-    if (dot(normalize(float2(s_px, s_py)), s_norm2) > cos(rb))
-    {
-        if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-        {
-        //return abs(dTorus);
-            float de = length(cp - float2(px, py));
-
-            if (de > r && kr > 0)
-            {
-          
-                return min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
-
-
-            }
-       
-            return dTorus * sig;
-        }
-        else
-        {
-            return min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
-        }
-
-    }
-
-    return 0.5*length(pos - fp);
-
-    //ha egyikben sincs benne -> szélső körtől távolság
-
-    //forgatni a s_norm2-t erre arra
-     //visszaváltani 3d-be
-    float2x2 s_rot1 = float2x2(cos(rb), -sin(rb), sin(rb), cos(rb));
-
-    float2 s_s1 = normalize(mul(s_rot1, s_norm2));
-    float3 rnorm1 = normalize(s_e1 * s_s1.x + s_e2 * s_s1.y);
-
-    float2x2 s_rot2 = float2x2(cos(-rb), -sin(-rb), sin(-rb), cos(-rb));
-
-    float2 s_s2 = normalize(mul(s_rot2, s_norm2));
-    float3 rnorm2 = normalize(s_e1 * s_s2.x + s_e2 * s_s2.y);   
-
-    //rnorm1 és d-nek a síkjára vetíteni p-cp-t
-
-            float fdist; //ebben lesz az itt kapott távolság
-             p2 = pos - c;
-
-            e2 = normalize(d);
-            e1 = normalize(rnorm1);
-
-            px = dot(e1, p2);
-            py = dot(e2, p2);
-
-    
-            nx = dot(e1, rnorm1);
-            ny = dot(e2, rnorm1);
-
-              norm2 = normalize(float2(nx, ny));
-    
-            dist1 = sqrt((px - R) * (px - R) + py * py) - r;
-            dist2 = sqrt((px + R) * (px + R) + py * py) - r;
-
-            fpp = fp - c;
-            fpx = dot(e1, fpp);
-            fpy = dot(e2, fpp);
-    
-            fd1 = length(float2(R, 0) - float2(fpx, fpy));
-            fd2 = length(float2(-R, 0) - float2(fpx, fpy));
-
-
-   
-            if (fd1 < fd2)
-            {   
-                dTorus = dist1;
-                cp = float2(R, 0);
-                
-            }
-            else
-            {
-                dTorus = dist2;
-                cp = float2(-R, 0);
-            }
-
-            rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
-
-            s1 = normalize(mul(rot1, norm2));
-            ep1 = cp + s1 * r;
-
-            rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
-
-            s2 = normalize(mul(rot2, norm2));
-            ep2 = cp + s2 * r;
-
-            if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-            {
-           
-                float de = length(cp - float2(px, py));
-                if (de > r && kr > 0)
-                {
-          
-                    fdist = min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
-
-
-                }   
-                else
-                {   
-       
-                    fdist = dTorus * sig;
-                }
-            }
-            else
-            {
-       
-
-                fdist = min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
-
-            }
-
-
-    //rnorm2 síkjába vetítés
-    e1 = normalize(rnorm2);
-
-    px = dot(e1, p2);
-    py = dot(e2, p2);
-
-    nx = dot(e1, rnorm2);
-    ny = dot(e2, rnorm2);
-
-    norm2 = normalize(float2(nx, ny));
-    
-    dist1 = sqrt((px - R) * (px - R) + py * py) - r;
-    dist2 = sqrt((px + R) * (px + R) + py * py) - r;
-
-   
-    fpp = fp - c;
-    fpx = dot(e1, fpp);
-    fpy = dot(e2, fpp);
-
-    fd1 = length(float2(R, 0) - float2(fpx, fpy));
-    fd2 = length(float2(-R, 0) - float2(fpx, fpy));
-
-    
-    
-    //return dTorus;
-    if (fd1 < fd2)
-    {
-        dTorus = dist1;
-        cp = float2(R, 0);
-
-    }
-    else
-    {
-        dTorus = dist2;
-        cp = float2(-R, 0);
-    }
-
-    rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
-
-    s1 = normalize(mul(rot1, norm2));
-    ep1 = cp + s1 * r;
-
-    rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
-
-    s2 = normalize(mul(rot2, norm2));
-    ep2 = cp + s2 * r;
-    
-    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-    {
-        //return abs(dTorus);
-        float de = length(cp - float2(px, py));
-
-        if (de > r && kr > 0)
-        {
-          
-            return min(fdist, min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py))));
-
-
-        }
-       
-        return min(fdist, dTorus * sig);
-    }
- 
-    //köröktől távolságok
-     
-    return max(fdist, min(length(float2(px, py) - ep1), length(float2(px, py) - ep2)));
-   
-    }
-
-float noInterp(float3 pos)
-{
-
-    float3 p1 = ((pos) / float3(boundingBox) + 0.5);
-    
-    float3 fuvw = clamp(p1 * (float(res)) - 0.5, 0, float(res) - 1);
-    int3 uvw = clamp(fuvw, 0, res - 2);
-  
-    
-    //float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res-0.00001);
-
-    float3 texelcenter = -float3(boundingBox / 2.0f)+((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
-
-    
-    float4 t1 = texture1[uvw];
-    float4 t2 = texture2[uvw];
-
-    float3 fp = t1.xyz;
-    float3 d = normalize(t2.xyz);
     float r = t1.w;
-    float R = t2.w;    
+    float R = t2.w;
 
     //calculating the normalvector for the representation conversion
     float3 n = texture3[uvw].xyz;
+    float inside = texture3[uvw].w;
 
     float sr = boundingBox / (float) res;
    
-    return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, sr);
+    return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, inside, sr);
 }
 
-float4 debug2(float3 pos, float3 debugpos)
+float4 debug(float3 pos, float3 debugpos)
 {
    
-    float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res-0.0001);
+    float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res - 0.0001);
 
     float3 texelcenter = -float3(boundingBox / 2.0f) + ((int3) uvw + float3(0.5)) * float3(boundingBox) / (float) res;
 
@@ -529,6 +307,7 @@ float4 debug2(float3 pos, float3 debugpos)
 
     //calculating the normalvector for the representation conversion
     float3 n = texture3[uvw].xyz;
+    float inside = texture3[uvw].w;
      //if the curvature is small use a plane
     if (abs(kr) < 0.1 && abs(kR) < 0.1)
     {
@@ -557,16 +336,91 @@ float4 debug2(float3 pos, float3 debugpos)
     if (abs(kR) < 0.1 || abs(kr) < 0.1)
     {
         //return 1;
-        c = fp +n*1/kr;
+        c = fp + n * 1 / kr;
         return sdCylinder(pos, r, c, n, axis);
     }
 
     //ha nem metszünk gömbbel
    
-    return float4(fp, sdTorus(pos, c, axis, r, R));
+  //  return float4(fp, sdTorus(pos, c, axis, r, R));
+
+    
+    float3 p = pos;
+    float sr = boundingBox / (float) res;
+
+    float dTorus = sdTorus(pos, c, axis, r, R);
+    float dSphere = sdSphere((p - fp), sr);
+
+    float sign = 1;
+
+
+    /*if (sdPlane(debugpos, n, fp) < 0)
+    {
+        sign = -1;
+        
+    }
+   // sign = 1;
+
+   /* if (r < sr)
+        sign = 1;
+
+    if (length(fp - debugpos) > sr)
+    {
+        sign = inside;
+    }
+
+    dTorus *= sign;*/
+
+    float d = 1;;
+    //different cases of the torus
+    if (kr > 0)
+    {
+       
+        if (kR <= 0)
+        {
+
+            d = sign * max(-dTorus, dSphere);
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                d = sign * max(-dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+           
+          
+        }
+        else
+        {
+           
+            d = sign * max(-dTorus, dSphere);
+        }
+
+    }
+    else
+    {
+        if (kR < 0)
+        {
+            
+            d = sign * max(dTorus, dSphere);
+        }
+        else
+        {
+
+            d = sign * max(dTorus, dSphere);
+            if (r <= 2 * sr) //the radius is smaller than the intersecting sphere
+                d = sign * max(dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+           
+         
+           
+           
+        }
+    }
+
+    
+    return float4(fp, dTorus);
+ 
+
+   
+
 }
 
-float4 debug(float3 pos, float3 debugpos)
+float4 debug2(float3 pos, float3 debugpos)
 {
    
     float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res - 0.0001);
@@ -579,7 +433,7 @@ float4 debug(float3 pos, float3 debugpos)
     float4 t2 = texture2[uvw];
 
     float3 fp = t1.xyz;
-    float3 d = t2.xyz;
+    float3 axis = t2.xyz;
     float kr = t1.w;
     float kR = t2.w;
 
@@ -588,11 +442,7 @@ float4 debug(float3 pos, float3 debugpos)
      //if the curvature is small use a plane
     float sr = boundingBox / (float) res;
     float sign = 1;
-    if (dot(n, normalize(fp - pos)) > 0 && length(fp - pos) < 0.1)
-    {
-        sign = -1;
-    }
-    
+  
     
 
     //smaller
@@ -610,7 +460,9 @@ float4 debug(float3 pos, float3 debugpos)
     }
 
     float3 cc = fp - n * r;
-    
+
+
+    float3 p = ((pos) / float3(boundingBox) + 0.5);
 
     //calculate center
     float3 c = fp + n / kR;
@@ -620,134 +472,94 @@ float4 debug(float3 pos, float3 debugpos)
         return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
     }
 
-    //calculate frequently used values
- 
-    float dTorus = sdTorus(pos, c, d, r, R);
-   
+     //calculate frequently used values
+    float dSphere = sdSphere((p - fp), sr);
+    float dTorus = sdTorus(p, c, axis, r, R);
 
-   
+    sign = 1;
 
-    float3 p2 = pos - c;
-    float3 e2 = normalize(d);
-    float3 norm = cross(e2, normalize(p2));
-
-    float3 e1 = normalize(cross(e2, norm));
-
-    float px = dot(e1, p2);
-    float py = dot(e2, p2);
-
-    float nx = dot(e1, n);
-    float ny = dot(e2, n);
-
-    float2 norm2 = normalize(float2(nx, ny));
-    
-    float dist1 = sqrt((px - R) * (px - R) + py * py) - r;
-    float dist2 = sqrt((px + R) * (px + R) + py * py) - r;
-
-   
-    
-    float3 fpp = fp - c;
-    float fpx = dot(e1, fpp);
-    float fpy = dot(e2, fpp);
-
-    float fd1 = length(float2(R, 0) - float2(fpx, fpy));
-    float fd2 = length(float2(-R, 0) - float2(fpx, fpy));
-
-    float2 cp;
-    
-    //return dTorus;
-    if (fd1 < fd2)
+    //if the curvature is small use a plane
+    if (abs(kr) < 0.01 && abs(kR) < 0.1)
     {
-        dTorus = dist1;
-        cp = float2(R, 0);
+        return max(sdPlane(p, normalize(sign * n), fp), dSphere);
+    }
+
+    if (dot(n, normalize(p - fp)) < 0)
+    {
+        sign = -1;
+
+    }
+    
+    //cylinder
+   /* if (abs(kR) < 0.1 || abs(kr) < 0.1)
+    {
+        c = fp + n * 1 / kr;
+        if (kr > 0)  
+            return sign * max(sign * -sdCylinder(p, r, c, n, axis), dSphere);
+        return sign * max(sign * sdCylinder(p, r, c, n, axis), dSphere);
+    }*/
+
+
+    sign = 1;
+    if (dot(n, normalize(p - fp)) < 0)
+    {
+        sign = -1;
+
+        if (kR <= 0 && dTorus > 0 && length(p - fp) < sr)
+        {
+            sign = 1;
+
+        }
+
+        if (kR > 0 && dTorus < 0 && length(p - fp) < sr)
+        {
+            sign = 1;
+
+        }
+    }
+
+    //sign = 1;
+    dTorus *= sign;
+
+   
+
+    //different cases of the torus
+    if (kr > 0)
+    {
+       
+        if (kR <= 0)
+        {
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(-dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+           
+            return sign * max(-dTorus, dSphere);
+        }
+        else
+        {
+           
+            return sign * max(-dTorus, dSphere);
+        }
 
     }
     else
     {
-        dTorus = dist2;
-        cp = float2(-R, 0);
-    }
-    float sig = 1;
-    if (kr > 0)
-    {
-        norm2 *= -1;
-        sig *= -1;
-    }
-    
-
-    float a = 90;
-    float ra = radians(a);
-
-    float2x2 rot1 = float2x2(cos(ra), -sin(ra), sin(ra), cos(ra));
-
-    float2 s1 = normalize(mul(rot1, norm2));
-    float2 ep1 = cp + s1 * r;
-
-    float2x2 rot2 = float2x2(cos(-ra), -sin(-ra), sin(-ra), cos(-ra));
-
-    float2 s2 = normalize(mul(rot2, norm2));
-    float2 ep2 = cp + s2 * r;
-    
-    if (dot(normalize(float2(px, py) - cp), norm2) > cos(ra))
-    {
-        //return abs(dTorus);
-        float de = length(cp - float2(px, py));
-
-        if (de > r && kr > 0)
+        if (kR < 0)
         {
-          
-            return min(min(dTorus * sig, -length(cp + s1 * de - float2(px, py))), -length(cp + s2 * de - float2(px, py)));
-
-
-        }
-
-        {
-
-            float sig2 = 1;
-            if (kR > 0)
-            {
-                sig2 *= -1;
-            }
-            float3 p2 = pos - c;
-            float3 e1 = normalize(sig2 * n);
-            float3 e2 = normalize(cross(e1, d));
-
-            float px = dot(e1, p2);
-            float py = dot(e2, p2);
-
-            float2 norm2 = normalize(float2(1, 0));
-
-           
-      
-            float a = 10;
-            float ra = radians(a);
-
-            if (dot(normalize(float2(px, py)), norm2) > cos(ra))
-            {
-
             
-                return dTorus * sig;
-            }
-            else
-            {
-                return 1;
-                return max(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
-            }
-    
+            return sign * max(dTorus, dSphere);
         }
-        
-        return dTorus * sig;
+        else
+        {
+            if (r <= 2 * sr) //the radius is smaller than the intersecting sphere
+                return sign * max(dTorus, max(sdPlane(p, sign * n, fp + sign * n * 0.005f), dSphere));
+           
+            return sign * max(dTorus, dSphere);
+           
+           
+        }
     }
 
-
-
-    //széle számolása
-
-    //széléhez mutató vektor
-
-   
-    
-    return min(length(float2(px, py) - ep1), length(float2(px, py) - ep2));
+    return 1;
 }
 
 
@@ -766,9 +578,11 @@ float getTexture(float3 uvw, float3 pos)
     //calculating the normalvector for the representation conversion
     float3 n = texture3[uvw].xyz;
 
-    float sr = boundingBox / (float) res*1.5f;
+    float inside = texture3[uvw].w;
+
+    float sr = boundingBox / (float) res;
    
-    return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, sr);
+    return sdTorusWithFootpointRepresentation(pos, fp, d, r, R, n, inside, sr);
 }
 
 float trilinear(float3 pos)
@@ -809,14 +623,14 @@ float trilinear(float3 pos)
 
 float filter(float3 p)
 {
-    #if INTERP == 0
-    return sdExact(p);
+#if INTERP == 0
+   // return sdExact(p);
     return noInterp(p);
-    #endif
-    #if INTERP == 1
+#endif
+#if INTERP == 1
     return trilinear(p);
-    #endif
-     return 0.0f;
+#endif
+    return 0.0f;
 }
 
 
@@ -827,7 +641,7 @@ float getDifference(float3 p1, float3 p2,)
 
 float3 getNormal_filter(float3 pos)
 {
-    float e = 0.00001;
+    float e = 0.000005;
     float3 n;
 
     {

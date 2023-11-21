@@ -5,6 +5,8 @@
 #include "head.slang"
 #include "../../snail.slang"
 #include "../../spike.slang"
+#include "vase.slang"
+#include "key.slang"
 
 
 float sdfSphere(float3 p, float s)
@@ -54,7 +56,7 @@ float map(float3 p)
         return sdOctahedron(p,0.3);
     #endif
     #if SDF == 3
-        return headsdf(p);
+        return keysdf(p);
     #endif
     #if SDF == 4
         return spikesdf(p);

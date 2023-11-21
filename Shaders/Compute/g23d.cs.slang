@@ -47,7 +47,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     n = getNormal(pos);
     fp = pos - map(pos) * n;
 
-    int s = 0;
+   int s = 0;
     while (abs(map(fp)) > 0.00001 && s < 40)
     {
         n = getNormal(fp);
@@ -58,6 +58,15 @@ void main(uint3 threadId : SV_DispatchThreadID)
 
     //inside
     bool inside = map(pos) < 0;
+
+    float is = 1;
+
+    if (inside)
+    {
+        is = -1;
+    }
+
+    n = normalize(pos - fp) * is;
 
     //calculate local base
     float3 b1, b2;
@@ -176,7 +185,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     data1[datai] = float4(fp, r);
     texdR[threadId.xyz] = float4(d,R);
     data2[datai] = float4(d, R);
-    texn[threadId.xyz] = float4(n, 1);
+    texn[threadId.xyz] = float4(n, is);
     data3[datai] = float4(n, 1);
     posdata[datai] = float4(threadId.xyz, 1);
 }

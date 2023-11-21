@@ -30,16 +30,19 @@ protected:
     int testres = 32;
     bool test = false;
     bool showtest = false;
-    std::vector<float> error;
-    float avgerror = 0;
-    float maxerror = 0;
+    std::vector<float> seconderror;
+    std::vector<float> firsterror;
+    std::vector<float> inferror;
+    float secondnorm = 0;
+    float firstnorm = 0;
+    float infnorm = 0;
     bool csgrun = false;
 
     //methods
     std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) = 0;
     void setupGui() override;
     virtual std::vector<Texture::SharedPtr> readFromFile(RenderContext* pRenderContext)= 0;
-    Texture::SharedPtr testing(RenderContext* pRenderContext);
+    void testing(RenderContext* pRenderContext);
 
     float a = 90;
     float b = 90;
