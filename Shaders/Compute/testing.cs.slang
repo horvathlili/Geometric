@@ -7,6 +7,8 @@
 RWStructuredBuffer<float> seconderrors;
 RWStructuredBuffer<float> firsterrors;
 RWStructuredBuffer<float> inferrors;
+RWStructuredBuffer<float> checkerrors;
+
 
 cbuffer csCb
 {
@@ -36,6 +38,7 @@ void main(uint2 threadId : SV_DispatchThreadID)
     float seconderror = 0;
     float firsterror = 0;
     float inferror = 0;
+   
 
     for (int i = 0; i < testres; i++)
     {
@@ -43,20 +46,32 @@ void main(uint2 threadId : SV_DispatchThreadID)
         float3 pos = getQueryPoint(float3(threadId.xy, i));
         error = abs(map(pos) - filter(pos));
 
+       // if (map(pos )<0)
+         //  error = 0;
+
+        float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
+
+    
+
+        float4 t1 = texture1[uvw];
+        
         seconderror += (error * error);
-
-
+        
+        
         firsterror += error;
 
         if (error > inferror)
         {
             inferror = error;
+           
+            //firsterrors[threadId.x * testres + threadId.y] = filter(t1.xyz);
+            //checkerrors[threadId.x * testres + threadId.y] = t1.z;
         }
     }
     
     
     seconderrors[threadId.x * testres + threadId.y] = seconderror;
-    firsterrors[threadId.x * testres + threadId.y] = firsterror;
+   firsterrors[threadId.x * testres + threadId.y] = firsterror;
     inferrors[threadId.x * testres + threadId.y] = inferror;
 }
 

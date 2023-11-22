@@ -33,6 +33,7 @@ protected:
     std::vector<float> seconderror;
     std::vector<float> firsterror;
     std::vector<float> inferror;
+    std::vector<float> checkerror;
     float secondnorm = 0;
     float firstnorm = 0;
     float infnorm = 0;

@@ -17,7 +17,7 @@ float sdPlane(float3 p, float3 n, float3 x)
 float sdCircle(float3 p, float3 n, float3 x, float r)
 {
 
-    float dd = dot(p - x, n);
+    float dd = sdPlane(p, n, x);
 
     float s = dd < 0 ? -1 : 1;
 
@@ -47,7 +47,7 @@ float noInterp(float3 pos)
     float sr = boundingBox / (float) res * 2.0f;
 
     return sdCircle(pos, t2.xyz, t1.xyz,sr);
-    return sdPlane(pos, normalize(t2.xyz), t1.xyz);
+   // return sdPlane(pos, normalize(t2.xyz), t1.xyz);
     return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
@@ -59,8 +59,16 @@ float4 debug(float3 pos,float3 debugpos)
     float4 t2 = texture2[uvw];
 
     float sr = boundingBox / (float) res * 2.0f;
+
+    float d = sdPlane(pos, t2.xyz, t1.xyz);
+
+    if (d < 0.0001)
+    {
+        d = abs(d) - 0.0001;
+
+    }
    
-    return float4(t1.xyz, sdPlane(pos, t2.xyz, t1.xyz));
+    return float4(t1.xyz, d);
 }
 
 float getTexture(float3 uvw, float3 pos)
@@ -132,13 +140,16 @@ float opSmoothIntersection
     float d1, float d2, float k)
 {
     float h = clamp(0.5 - 0.5 * (d2 - d1) / k, 0.0, 1.0);
-    return lerp(d2, d1, h) + k * h * (1.0 - h);
+   // return lerp(d2, d1, h) + k * h * (1.0 - h);
+
+    return max(d1, d2);
 }
 
 float opSmoothUnion
     (
     float d1, float d2, float k)
 {
+    return min(d1, d2);
     return -opSmoothIntersection(-d1, -d2, k);
 }
 
@@ -201,26 +212,31 @@ float csg2(float3 p)
     
     float3 fp[4];
     float3 n[4];
+    float conv[4];
     fp[0] = texture1[uvw + pp[ix.r]].xyz;
     n[0] = texture2[uvw + pp[ix.r]].xyz;
+    conv[0] = texture1[uvw + pp[ix.r]].w;
     fp[1] = texture1[uvw + pp[ix.g]].xyz;
     n[1] = texture2[uvw + pp[ix.g]].xyz;
+    conv[1] = texture1[uvw + pp[ix.g]].w;
     fp[2] = texture1[uvw + pp[ix.b]].xyz;
     n[2] = texture2[uvw + pp[ix.b]].xyz;
+    conv[2] = texture1[uvw + pp[ix.b]].w;
     fp[3] = texture1[uvw + pp[ix.a]].xyz;
     n[3] = texture2[uvw + pp[ix.a]].xyz;
-
+    conv[3] = texture1[uvw + pp[ix.a]].w;
+    
     float d[4];
 
-    float e = boundingBox / (float) res * 2.0f;
+    float e = boundingBox / (float) res ;
 
     float k = 0.005;
     k = 0;
-    float sr = boundingBox / (float) res * 2.0f;
+    float sr = boundingBox / (float) res * 2.0f ;
     
     for (int i = 0; i < 4; i++)
     {
-        d[i] = max(sdSphere(p - fp[i], e), sdPlane(p, n[i], fp[i]));
+       // d[i] = max(sdSphere(p - fp[i], e), sdPlane(p, n[i], fp[i]));
         d[i] = sdCircle(p, n[i], fp[i], sr);
     }
 
@@ -252,14 +268,25 @@ float csg2(float3 p)
                 c[k]++;
                 csum++;
             }
+            
+            
 
             if (cc[j][k] == -1)
             {
-                cc[j][k] = 1;
-                c[j]++;
-                cc[k][j] = 1;
-                c[k]++;
-                csum++;
+                if (conv[j] == -1 || conv[k] == -1)
+                {
+                    cc[j][k] = 1;
+                    c[j]++;
+                    cc[k][j] = 1;
+                    c[k]++;
+                    csum++;
+                }
+                else
+                {
+                    
+                    cc[j][k] = 0;
+                    cc[k][j] = 0;
+                }
             }
 
         }
@@ -562,6 +589,7 @@ float3 getNormal_filter(float3 pos)
         float3 p23 = pos - float3(0, 0, e);
       
         n.z = getDifference(p13, p23);
-    
-    return normalize(n);
+
+   
+    return -normalize(n);
 }

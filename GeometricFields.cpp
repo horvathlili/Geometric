@@ -184,7 +184,12 @@ void GeometricFields::onGuiRender(Gui* pGui)
      }
 
   Gui::Window t(pGui, "Test", { 350, 150 }, { 700, 10 });
-
+  if (field == Field::g02d) {
+      program2DG0.testGui(&w);
+  }
+  if (field == Field::g12d) {
+      program2DG1.testGui(&w);
+  }
  
   if (field == Field::g13d) {
       program3DG1.testGui(&w);

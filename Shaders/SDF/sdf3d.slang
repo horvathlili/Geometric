@@ -7,6 +7,9 @@
 #include "../../spike.slang"
 #include "vase.slang"
 #include "key.slang"
+#include "temple.slang"
+#include "julia.slang"
+#include "knob.slang"
 
 
 float sdfSphere(float3 p, float s)
@@ -39,10 +42,21 @@ float sdOctahedron(float3 p, float s)
     return length(float3(q.x, q.y - s + k, q.z - k));
 }
 
-/*float sdlotofcircles(float3 p)
+float opTwist(float3 p)
 {
-    
-}*/
+    const float k = 10.0; // or some other amount
+    float c = cos(k * p.y);
+    float s = sin(k * p.y);
+    float2x2 m = float2x2(c, -s, s, c);
+    float3 q = float3(mul(m, p.xz), p.y);
+    return sdTorus(q, float2(0.4, 0.1));
+}
+
+float sdlotofcircles(float3 p)
+{
+    return min(sdSphere(p, 0.3), sdCone(p - float3(-0.1, -0.1, 0.1), float2(1, 0.4)));
+
+}
 
 float map(float3 p)
 {
@@ -56,17 +70,26 @@ float map(float3 p)
         return sdOctahedron(p,0.3);
     #endif
     #if SDF == 3
-        return keysdf(p);
+        return vasesdf(p);
     #endif
     #if SDF == 4
         return spikesdf(p);
     #endif
+    #if SDF == 5
+        return sdlotofcircles(p);
+    #endif
+    #if SDF == 6
+        return snailsdf(p);
+    #endif
+#if SDF == 7
+        return knobsdf(p);
+#endif
 
 }
 
 float3 getNormal(float3 p)
 {
-    float e = 0.0001;
+    float e = 0.00001;
     float3 n;
     n.x = map(p + float3(e, 0, 0)) - map(p - float3(e, 0, 0));
     n.y = map(p + float3(0, e, 0)) - map(p - float3(0, e, 0));

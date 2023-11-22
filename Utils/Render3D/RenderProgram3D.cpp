@@ -113,7 +113,7 @@ void RenderProgram3D::testing(RenderContext* pRenderContext) {
         mpSampler = Sampler::create(desc);
     }
 
-    testres = 217;
+//    testres = 217;
     comp["csCb"]["testres"] = testres;
    comp["texture1"] = textures[0];
    comp["texture2"] = textures[1];
@@ -133,6 +133,7 @@ void RenderProgram3D::testing(RenderContext* pRenderContext) {
     comp.allocateStructuredBuffer("seconderrors", testres*testres);
     comp.allocateStructuredBuffer("firsterrors", testres * testres);
     comp.allocateStructuredBuffer("inferrors", testres * testres);
+    comp.allocateStructuredBuffer("checkerrors", testres * testres);
 
     comp.runProgram(pRenderContext, testres,testres);
 
@@ -149,6 +150,10 @@ void RenderProgram3D::testing(RenderContext* pRenderContext) {
     inferror.resize(testres * testres);
     inferror.assign(dataptri, dataptri + testres * testres);
     comp.unmapBuffer("inferrors");
+    auto dataptrc = comp.mapBuffer<const float>("checkerrors");
+   checkerror.resize(testres * testres);
+    checkerror.assign(dataptrc, dataptrc + testres * testres);
+    comp.unmapBuffer("checkerrors");
 
     secondnorm = 0;
     firstnorm = 0;
@@ -162,6 +167,7 @@ void RenderProgram3D::testing(RenderContext* pRenderContext) {
         if (inferror[i] > infnorm) {
             infnorm = inferror[i];
         }
+
     }
 
     secondnorm = sqrt(secondnorm);

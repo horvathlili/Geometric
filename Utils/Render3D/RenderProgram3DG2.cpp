@@ -29,6 +29,7 @@ void RenderProgram3DG2::renderGui(Gui::Window* w) {
     w->slider("finegird Res", finegridRes, 1, 10);
     w->separator();
     w->radioButtons(bg_sdf3d, sdf3d);
+    w->slider("Sdf", sdf3d, (uint)1, (uint)7);
     w->separator();
     w->radioButtons(bg_interp, interp);
     w->separator();

@@ -61,30 +61,29 @@ std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext
 
     comp["tex"].setUav(pTex->getUAV(0));
     comp["csCb"]["res"] = resolution;
-    
     comp["csCb"]["boundingBox"] = boundingBox;
-    comp["csCb"]["contourN"] = contournum;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf2d));
     comp.allocateStructuredBuffer("data1", resolution * resolution);
-    comp.allocateStructuredBuffer("segments", (int)ob.contours.size() , ob.contours.data(), sizeof(int) * (int)ob.contours.size());
+    comp.allocateStructuredBuffer("segments", (int)ob.contours.size(), ob.contours.data(), sizeof(int) * (int)ob.contours.size());
     comp.allocateStructuredBuffer("controlPoints", (int)ob.controlPoints.size(), ob.controlPoints.data(), sizeof(float) * (int)ob.controlPoints.size());
     std::vector<int> v; v.push_back(ob.contourNumber);
-    comp.allocateStructuredBuffer("cn",1, v.data(), sizeof(int) );
+    comp.allocateStructuredBuffer("cn", 1, v.data(), sizeof(int));
 
     comp.allocateStructuredBuffer("posdata", resolution * resolution);
 
     comp.runProgram(pRenderContext, resolution, resolution);
 
-    auto dataptr = comp.mapBuffer<const float4>("data1");
+    /*auto dataptr = comp.mapBuffer<const float4>("data1");
     data1.resize(resolution * resolution);
     data1.assign(dataptr, dataptr + resolution * resolution);
     comp.unmapBuffer("data1");
     dataptr = comp.mapBuffer<const float4>("posdata");
     posdata.resize(resolution * resolution);
     posdata.assign(dataptr, dataptr + resolution * resolution);
-    comp.unmapBuffer("posdata");
+    comp.unmapBuffer("posdata");*/
 
     std::vector<Texture::SharedPtr> textures;
+    textures.push_back(pTex);
     textures.push_back(pTex);
     textures.push_back(pTex);
 

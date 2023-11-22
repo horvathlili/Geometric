@@ -40,24 +40,64 @@ void main(uint3 threadId : SV_DispatchThreadID)
     n = getNormal(pos);
     fp = pos - map(pos) * n;
 
+    float3 fp2,n2;
+
+  
    int s = 0;
-    while (abs(map(fp)) > 0.000001 && s < 40)
+    while (dot(n, getNormal(fp))>0 &&  abs(map(fp)) > 0.0001 && s < 40)
     {
         n = getNormal(fp);
         fp = fp - n * map(fp);
         s++;
     }
 
-
     n = getNormal(fp);
 
     int is = map(pos) < 0 ? -1 : 1;
-    n = normalize(pos - fp) * is;
+   n = normalize(pos - fp) * is;
 
+   
+    
+  
+    int inside = 0;
+    int outside = 0;
+
+    for (int i = -3; i <= 3; i++)
+    {
+        for (int j = -3; j <= 3; j++)
+        {
+            for (int k= -3; k <= 3; k++)
+            {
+            
+                float3 fp3 = fp + float3(i, j, k) * 1 / 6.0f * boundingBox / (float3) res * 0.01;
+            
+            
+
+            
+
+                if (map(fp3) <= 0)
+                {
+                    inside++;
+                }
+                else
+                {
+                    outside++;
+                }
+            }
+
+        }
+    }
+
+    int conv = 1;
+
+    if (inside > outside)
+    {
+        conv = -1;
+    }
 
     int datai = threadId.x * res * res + threadId.y * res + threadId.z;
      
-    texfp[threadId.xyz] = float4(fp,0);
+    texfp[threadId.xyz] = float4(fp,conv);
     data1[datai] = float4(fp,0);
     texn[threadId.xyz] = float4(n, 0);
     data2[datai] = float4(n, 0);

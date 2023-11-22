@@ -32,6 +32,7 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
     (w->slider("boundingBox", sliderboundingBox, 2.f, 20.f));
     w->separator();
     w->radioButtons(bg_sdf3d, sdf3d);
+    w->slider("Sdf", sdf3d, (uint)1, (uint)7);
     w->separator();
     w->radioButtons(bg_interp, interp);
 

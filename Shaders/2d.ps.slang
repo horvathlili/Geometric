@@ -110,8 +110,10 @@ PsOut main(psIn input) : SV_TARGET
     
 
         if (debug)
-        {          
+        {
+            float2 ppos = (pp - 0.5) * boundingBox;
           o.col =debug1(a,d);
+            o.col = float4(float3(map(ppos) - filter(pp))*10, 1);
 
         }
 

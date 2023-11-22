@@ -89,6 +89,7 @@
     <ShaderSource Include="Shaders\Utils\includes3d.slang" />
     <ShaderSource Include="Shaders\Utils\ray.slang" />
     <ShaderSource Include="Shaders\Utils\spheretrace.slang" />
+    <ShaderSource Include="testing2d.cs.slang" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65BCD11B-FC56-4F3D-9976-084933AF4187}</ProjectGuid>
