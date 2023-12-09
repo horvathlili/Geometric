@@ -47,13 +47,15 @@ float noInterp(float3 pos)
     float sr = boundingBox / (float) res * 2.0f;
 
     return sdCircle(pos, t2.xyz, t1.xyz,sr);
-   // return sdPlane(pos, normalize(t2.xyz), t1.xyz);
-    return max(sdSphere(pos - t1.xyz, sr), sdPlane(pos, t2.xyz, t1.xyz));
+   //return sdPlane(pos, normalize(t2.xyz), t1.xyz);
+   // return max(sdSphere(pos - t1.xyz,sr), sdPlane(pos, t2.xyz, t1.xyz));
 }
 
 float4 debug(float3 pos,float3 debugpos)
 {
     float3 uvw = ((debugpos) / float3(boundingBox) + 0.5) * (res);
+
+    uvw = clamp(uvw, 0, res - 1);
 
     float4 t1 = texture1[uvw];
     float4 t2 = texture2[uvw];
@@ -62,11 +64,11 @@ float4 debug(float3 pos,float3 debugpos)
 
     float d = sdPlane(pos, t2.xyz, t1.xyz);
 
-    if (d < 0.0001)
+   /* if (d < 0.0001)
     {
         d = abs(d) - 0.0001;
 
-    }
+    }*/
    
     return float4(t1.xyz, d);
 }
@@ -211,19 +213,23 @@ float csg2(float3 p)
     int4 ix = tetrav(fuvw - int3(uvw));    
     
     float3 fp[4];
-    float3 n[4];
+    float3 n[4],n2[4];
     float conv[4];
     fp[0] = texture1[uvw + pp[ix.r]].xyz;
     n[0] = texture2[uvw + pp[ix.r]].xyz;
+    n2[0] = texture2[uvw + pp[ix.r]].xyz;
     conv[0] = texture1[uvw + pp[ix.r]].w;
     fp[1] = texture1[uvw + pp[ix.g]].xyz;
     n[1] = texture2[uvw + pp[ix.g]].xyz;
+    n2[1] = texture2[uvw + pp[ix.g]].xyz;
     conv[1] = texture1[uvw + pp[ix.g]].w;
     fp[2] = texture1[uvw + pp[ix.b]].xyz;
     n[2] = texture2[uvw + pp[ix.b]].xyz;
+    n2[2] = texture2[uvw + pp[ix.b]].xyz;
     conv[2] = texture1[uvw + pp[ix.b]].w;
     fp[3] = texture1[uvw + pp[ix.a]].xyz;
     n[3] = texture2[uvw + pp[ix.a]].xyz;
+    n2[3] = texture2[uvw + pp[ix.a]].xyz;
     conv[3] = texture1[uvw + pp[ix.a]].w;
     
     float d[4];
@@ -236,7 +242,7 @@ float csg2(float3 p)
     
     for (int i = 0; i < 4; i++)
     {
-       // d[i] = max(sdSphere(p - fp[i], e), sdPlane(p, n[i], fp[i]));
+        //d[i] = max(sdSphere(p - fp[i], sr), sdPlane(p, n[i], fp[i]));
         d[i] = sdCircle(p, n[i], fp[i], sr);
     }
 
@@ -273,7 +279,7 @@ float csg2(float3 p)
 
             if (cc[j][k] == -1)
             {
-                if (conv[j] == -1 || conv[k] == -1)
+                if (conv[j] == -1  && conv[k] == -1)
                 {
                     cc[j][k] = 1;
                     c[j]++;
@@ -591,5 +597,5 @@ float3 getNormal_filter(float3 pos)
         n.z = getDifference(p13, p23);
 
    
-    return -normalize(n);
+    return normalize(n);
 }

@@ -48,6 +48,9 @@ protected:
     float a = 90;
     float b = 90;
 
+    float relg = 1;
+    float rels = 1;
+
     virtual void csgFilter(RenderContext* pRenderContext) = 0;
 
 

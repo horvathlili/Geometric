@@ -76,28 +76,57 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float
     //calculate center
     float3 c = fp + n / kR;
 
-    //return sdPlane(p, n, fp);
 
     //calculate frequently used values
     float dSphere = sdSphere((p - fp), sr);
     float dTorus = sdTorus(p, c, axis, r, R);
 
+    float sign = 1;
+
+    //if it is a sphere
     if (R < 0.01)
     {
         R = 0;
         float3 c = fp + n / kr;
         dTorus = sdSphere(p - c, r);
+
+        if (length(p - fp) > sr) //if its far then decide by the query point
+        {
+            sign = inside;
+        }
+        else
+        {
+            sign = dTorus < 0 ? -1 : 1; //if its close take the real inside outside
+            if (kr > 1)
+            {
+                sign *= -1;
+            }
+        }
+        
+
+        if (kr > 0)
+        {
+            return sign*max(sign*-dTorus, dSphere);
+        }
+
+        return sign*max(sign*dTorus, dSphere);
     }
 
-    float sign = 1;
-    if (sdPlane(p, n, fp) < 0)
-    {
-        sign = -1;
-    }
-
+ 
     //if the curvature is small use a plane
     if (abs(kr) < 0.1 && abs(kR) < 0.1)
     {
+        sign = 1;
+        if (sdPlane(p, normalize(n), fp) < 0)
+        {
+            sign = -1;
+        }
+        if (length(p - fp) > sr) //if its far then decide by the query point
+        {
+            sign = inside;
+        }
+
+      
         return sign * max(sign * sdPlane(p, normalize(n), fp), dSphere);
     }
 
@@ -106,33 +135,38 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float
    
     
     //cylinder
-    if (abs(kR) < 0.1 && abs(kr) > 0.1)
+    if (abs(kR) < 0.1 && abs(kr) >= 0.1)
     {
+
+        //recalculate the center
         c = fp + n * 1 / kr;
-
-        if (sdPlane(p, n, fp) < 0)
-        {
-            sign = -1;
-
-     
+        float dCylinder = sdCylinder(p, r, c, n, axis);
 
         
+        if (length(p - fp) > sr) //if its far then decide by the query point
+        {
+            sign = inside;
+        }
+        else
+        {
+            sign = dCylinder < 0 ? -1 : 1; //if its close take the real inside outside
+            if (kr > 0)
+            {
+                sign *= -1;
+            }
         }
        
-
-        float dCylinder = sdCylinder(p, r, c, n, axis);
-        
         if (kr > 0)
         {
             if (r <= sr) //the radius is smaller than the intersecting sphere
-                return sign * max(sign * -dCylinder, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
+                return sign * max(max(sign * -dCylinder, sdPlane(p, n, fp +  n * 0.005f)), dSphere);
            
             return sign * max(sign * -dCylinder, dSphere);
         }
         
-        if (r <= sr)
-            return sign * max(sign * dCylinder, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
-           
+        if (r <= sr) //the radius is smaller than the intersecting sphere
+            return sign * max(max(sign * dCylinder, sdPlane(p, n, fp + n * 0.005f)), dSphere);
+            
         return sign * max(sign * dCylinder, dSphere);
     }
 
@@ -142,68 +176,26 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float
     sign = 1;
    
 
-    if (sdPlane(p, n, fp) < 0)
-    {
-        sign = -1;
-
      
-
-        
-    }
-   /* else
-    {
-        /*if (kR > 0)
-        {
-            if (kr <= 0 && dTorus < 0 && length(p - fp) < sr)
-            {
-                sign = -1;
-
-            }
-
-        
-            if (kr > 0 && dTorus > 0 && length(p - fp) < sr)
-            {
-                sign = -1;
-
-            }
-        }
-    }*/
-
-    if (kr <= 0 && dTorus > 0 && length(p - fp) < 2 * sr)
-    {
-        sign = 1;
-
-    }
-
-        
-    if (kr > 0 && dTorus < 0 && length(p - fp) < 2 * sr)
-    {
-        sign = 1;
-
-    }
-
-    if (kr <= 0 && dTorus < 0 && length(p - fp) < 2 * sr)
-    {
-        sign = -1;
-
-    }
-
-        
-    if (kr > 0 && dTorus > 0 && length(p - fp) < 2 * sr)
-    {
-        sign = -1;
-
-    }
-    
-    if (r < sr)
-        sign = 1;
-    
-    if (length(fp - p) > sr)
+    if (length(p - fp) > sr) //if its far then decide by the query point
     {
         sign = inside;
     }
+    else
+    {
+        sign = dTorus < 0 ? -1 : 1; //if its close take the real inside outside
+        if (kr > 0)
+        {
+            sign *= -1;
+        }
+    }
     
+    //if (r < sr)
+      //  sign = 1;
     
+  
+    
+   
     dTorus *= sign;
 
   
@@ -217,14 +209,18 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float
        
         if (kR <= 0)
         {
-            if (r <= sr) //the radius is smaller than the intersecting sphere
-                return sign * max(-dTorus, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
-           
-            return sign * max(-dTorus, dSphere);
-        }
+            if (r <= sr)
+            { //the radius is smaller than the intersecting sphere
+                
+                return sign * max(max(-dTorus, sdPlane(p, n, fp + n * 0.005f)), dSphere);
+            }
+                return sign * max(-dTorus, dSphere);
+            }
         else
         {
-          
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(max(-dTorus, sdPlane(p, n, fp + n * 0.005f)), dSphere);
+           
             return sign * max(-dTorus, dSphere);
         }
 
@@ -235,13 +231,15 @@ float sdTorusWithFootpointRepresentation(float3 p, float3 fp, float3 axis, float
         
         if (kR < 0)
         {
-            
+            if (r <= sr) //the radius is smaller than the intersecting sphere
+                return sign * max(max(dTorus, sdPlane(p, n, fp + n * 0.005f)), dSphere);
+           
             return sign * max(dTorus, dSphere);
         }
         else
         {
             if (r <= sr) //the radius is smaller than the intersecting sphere
-                return sign * max(dTorus, max(sdPlane(p, n, fp + n * 0.005f), dSphere));
+                return sign * max(max(dTorus, sdPlane(p, n, fp + n * 0.005f)), dSphere);
            
             return sign * max(dTorus, dSphere);
            
@@ -467,8 +465,16 @@ float4 debug2(float3 pos, float3 debugpos)
     //calculate center
     float3 c = fp + n / kR;
 
+    
+    if (dot(n, normalize(p - fp)) < 0)
+    {
+        sign = -1;
+
+    }
+
     if (abs(kr) < 0.01 && abs(kR) < 0.1)
     {
+        return 1;
         return max(sdPlane(pos, normalize(sign * n), fp), sdSphere((pos - fp), sr));
     }
 
@@ -478,17 +484,16 @@ float4 debug2(float3 pos, float3 debugpos)
 
     sign = 1;
 
+
     //if the curvature is small use a plane
     if (abs(kr) < 0.01 && abs(kR) < 0.1)
     {
+        return 1;
+        return sdPlane(p, normalize( n), fp);
         return max(sdPlane(p, normalize(sign * n), fp), dSphere);
     }
 
-    if (dot(n, normalize(p - fp)) < 0)
-    {
-        sign = -1;
-
-    }
+   
     
     //cylinder
    /* if (abs(kR) < 0.1 || abs(kr) < 0.1)
@@ -665,5 +670,5 @@ float3 getNormal_filter(float3 pos)
       
         n.z = getDifference(p1, p2);
     }
-    return -normalize(n);
+    return normalize(n);
 }

@@ -1,6 +1,7 @@
 #include "ray.slang"
 #include "spheretrace.slang"
 
+
 #ifndef FIELD
 #define FIELD 1
 #endif
@@ -33,6 +34,7 @@ cbuffer psCb
     int restest;
     float a;
     float b;
+    float rel;
 };
 
 SamplerState mSampler;

@@ -30,7 +30,18 @@ Link: N/A
 // helper maths
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+float3x3 RotMat(float3 axis, float angle)
+{
+    // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return float3x3(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s,
+                oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s,
+                oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // distance functions
@@ -85,7 +96,7 @@ float ssub(float d1, float d2, float k)
 float sdBase(float3 p)
 {
     // Intersect two cones
-    float base = kopSmoothUnion(sdCone(mul((p + float3(0., .9, 0.)), RotMat(float3(1., 0., 0.), -PI / 2.)),
+    float base = kopSmoothUnion(sdCone(mul((p + float3(0., .9, 0.)) , RotMat(float3(1., 0., 0.), -PI / 2.)),
                                        float2(PI / 3., PI / 3.)),
                                sdCone(mul((p - float3(0., .9, 0.)), RotMat(float3(1., 0., 0.), PI / 2.)),
                                        float2(PI / 3., PI / 3.)),

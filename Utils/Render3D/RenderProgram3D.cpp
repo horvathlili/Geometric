@@ -168,6 +168,7 @@ void RenderProgram3D::testing(RenderContext* pRenderContext) {
             infnorm = inferror[i];
         }
 
+       // std::cout << seconderror[i] << " " << firsterror[i] << " " << inferror[i] << " " << checkerror[i] << std::endl;
     }
 
     secondnorm = sqrt(secondnorm);
@@ -229,6 +230,7 @@ void RenderProgram3D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Vars["psCb"]["debugpos"] = debugpos_3d;
         Vars["psCb"]["debugging"] = debugging;
         Vars["psCb"]["restest"] = testres;
+        Vars["psCb"]["rel"] = rels;
         Vars["mSampler"] = mpSampler;
         Program->addDefine("SDF", std::to_string(sdf3d));
         Program->addDefine("INTERP", std::to_string(interp));

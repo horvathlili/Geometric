@@ -20,25 +20,28 @@ void RenderProgram3DG0::renderGui(Gui::Window* w) {
     (w->radioButtons(bg_texsize, texturesize));
 
     w->slider("resolution", sliderRes, 1, 100);
-
+    w->slider("relaxed generating", relg, 0.f, 1.f);
     (w->slider("boundingBox", sliderboundingBox, 2.f, 20.f));
     w->separator();
     w->radioButtons(bg_sdf3d, sdf3d);
     w->slider("Sdf", sdf3d, (uint)1, (uint)7);
     w->separator();
-   
+
+    w->slider("relaxed spheretrace", rels, 0.f, 1.f);
    
 }
 
 
 std::vector<Texture::SharedPtr> RenderProgram3DG0::generateTexture(RenderContext* pRenderContext) {
     Texture::SharedPtr pTexfp = nullptr;
-   
+    Texture::SharedPtr pTexdummy = nullptr;
+
+    pTexdummy = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
 
     if (texturesize == 0) {
         pTexfp = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-      
-
+        
     }
     if (texturesize == 1) {
         pTexfp = Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA32Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
@@ -49,6 +52,7 @@ std::vector<Texture::SharedPtr> RenderProgram3DG0::generateTexture(RenderContext
 
     comp["texfp"].setUav(pTexfp->getUAV(0));
     comp["csCb"]["res"] = resolution;
+    comp["csCb"]["rel"] = relg;
     comp["csCb"]["boundingBox"] = boundingBox;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf3d));
     comp.allocateStructuredBuffer("data1", resolution * resolution * resolution);
@@ -68,10 +72,15 @@ std::vector<Texture::SharedPtr> RenderProgram3DG0::generateTexture(RenderContext
     posdata.assign(dataptr, dataptr + resolution * resolution * resolution);
     comp.unmapBuffer("posdata");
 
+    /*for (int i = 0; i < resolution * resolution * resolution; i++) {
+        if (posdata[i].z == 0)
+            std::cout << data1[i].x << " " << data1[i].y << " " << data1[i].z << std::endl;
+    }*/
+
     std::vector<Texture::SharedPtr> textures;
     textures.push_back(pTexfp);
-    textures.push_back(pTexfp);
-    textures.push_back(pTexfp);
+    textures.push_back(pTexdummy);
+    textures.push_back(pTexdummy);
 
     return textures;
 }

@@ -29,7 +29,7 @@ float4 sphereTrace(float3 pixelpos)
        
         if (h < 0.0001 || isOutOfBox(pos))
             break;
-        t +=h;
+        t += rel*h;
     }
 
     float3 hitpos = pos;

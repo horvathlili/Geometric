@@ -3,6 +3,7 @@
 RWStructuredBuffer<float> x0;
 RWTexture3D<float4> texfp;
 RWTexture3D<float4> texn;
+RWTexture3D<float4> texn2;
 RWStructuredBuffer<float4> data1;
 RWStructuredBuffer<float4> data2;
 
@@ -14,6 +15,7 @@ cbuffer csCb
     int sdf;
     int res;
     float boundingBox;
+    float rel;
 };
 
 float distP(float4 s, float3 pos)
@@ -43,21 +45,21 @@ void main(uint3 threadId : SV_DispatchThreadID)
     float3 fp2,n2;
 
   
-   int s = 0;
-    while (dot(n, getNormal(fp))>0 &&  abs(map(fp)) > 0.0001 && s < 40)
+  int s = 0;
+    while (abs(map(fp)) > 0.001 && s < 40)
     {
         n = getNormal(fp);
-        fp = fp - n * map(fp);
+        fp = fp - rel*n * map(fp);
         s++;
     }
-
+    s = 0;
+   
     n = getNormal(fp);
 
     int is = map(pos) < 0 ? -1 : 1;
    n = normalize(pos - fp) * is;
 
    
-    
   
     int inside = 0;
     int outside = 0;
@@ -69,7 +71,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
             for (int k= -3; k <= 3; k++)
             {
             
-                float3 fp3 = fp + float3(i, j, k) * 1 / 6.0f * boundingBox / (float3) res * 0.01;
+                float3 fp3 = fp + float3(i, j, k) *1/7.0f * boundingBox / (float3) res * 0.5;
             
             
 
@@ -90,16 +92,22 @@ void main(uint3 threadId : SV_DispatchThreadID)
 
     int conv = 1;
 
-    if (inside > outside)
+    if (inside >= outside)
     {
         conv = -1;
     }
 
     int datai = threadId.x * res * res + threadId.y * res + threadId.z;
+
+
+    float h = -dot(n, fp);
+    float d = dot(pos, n) + h;
+   
      
     texfp[threadId.xyz] = float4(fp,conv);
-    data1[datai] = float4(fp,0);
+    data1[datai] = float4(fp, conv);
     texn[threadId.xyz] = float4(n, 0);
     data2[datai] = float4(n, 0);
+    texn2[threadId.xyz] = float4(getNormal(fp), 0);
     posdata[datai] = float4(threadId.xyz, 1);
 }

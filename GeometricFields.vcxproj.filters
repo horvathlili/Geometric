@@ -207,15 +207,6 @@
     <ShaderSource Include="Shaders\Compute\csgprecalc.cs.slang">
       <Filter>Shaders\Compute</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\SDF\helix.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
-    <ShaderSource Include="Shaders\SDF\julia.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
-    <ShaderSource Include="Shaders\SDF\key.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
     <ShaderSource Include="Shaders\SDF\knob.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
@@ -225,14 +216,38 @@
     <ShaderSource Include="Shaders\SDF\spike.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
-    <ShaderSource Include="Shaders\SDF\temple.slang">
-      <Filter>Shaders\SDF</Filter>
-    </ShaderSource>
     <ShaderSource Include="Shaders\SDF\vase.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
     <ShaderSource Include="testing2d.cs.slang">
       <Filter>Shaders\Compute</Filter>
+    </ShaderSource>
+    <ShaderSource Include="helix.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="jelly.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="tiefighter.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="boat.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="beziersdf.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="dodeca.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="mobius.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="rock.slang">
+      <Filter>Shaders\SDF</Filter>
+    </ShaderSource>
+    <ShaderSource Include="isocahedron.slang">
+      <Filter>Shaders\SDF</Filter>
     </ShaderSource>
   </ItemGroup>
 </Project>

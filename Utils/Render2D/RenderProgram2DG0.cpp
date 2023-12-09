@@ -26,6 +26,8 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
     w->radioButtons(bg_sdf2d, sdf2d);
     if (sdf2d == SDF2d::font) {
         w->textbox("letter", ft);
+        w->slider("offset w", bw, 0.f, 1.f);
+        w->slider("offset h", bh, 0.f, 1.f);
         w->textbox("fontfile", fontf);
     }
     w->slider("resolution", sliderRes, 10, 256);

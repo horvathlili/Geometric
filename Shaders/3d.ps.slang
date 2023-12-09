@@ -38,7 +38,7 @@ PsOut main(psIn input) : SV_TARGET
         float3 diffuse = clamp(dot(normalize(-light_dir), normalize(getNormal_filter(hitpos.xyz))), 0, 1) * Ld * Kd;
 
         o.col = float4(ambient + diffuse, 1);
-        o.col = -float4(getNormal_filter(hitpos.xyz), 1);
+        //o.col = -float4(getNormal_filter(hitpos.xyz), 1);
 
     }
 

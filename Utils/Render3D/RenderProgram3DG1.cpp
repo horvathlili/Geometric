@@ -28,13 +28,14 @@ void RenderProgram3DG1::renderGui(Gui::Window* w) {
     (w->radioButtons(bg_texsize, texturesize));
 
     w->slider("resolution", sliderRes, 1, 100);
-
+    w->slider("relaxed generating", relg, 0.f, 1.f);
     (w->slider("boundingBox", sliderboundingBox, 2.f, 20.f));
     w->separator();
     w->radioButtons(bg_sdf3d, sdf3d);
     w->slider("Sdf", sdf3d, (uint)1, (uint)7);
     w->separator();
     w->radioButtons(bg_interp, interp);
+    w->slider("relaxed spheretrace", rels, 0.f, 1.f);
 
     if (w->button(debugging ? "debug on" : "debug off")) {
         debugging = !debugging;
@@ -90,6 +91,11 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
     Texture::SharedPtr pTexfp = nullptr;
     Texture::SharedPtr pTexn = nullptr;
 
+    Texture::SharedPtr pTexn2 = nullptr;
+
+    pTexn2= Texture::create3D(resolution, resolution, resolution, ResourceFormat::RGBA16Float, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+
     ResourceFormat format = ResourceFormat::RGBA16Float;
 
     if (texturesize == 1) {
@@ -108,6 +114,8 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
 
     comp["texfp"].setUav(pTexfp->getUAV(0));
     comp["texn"].setUav(pTexn->getUAV(0));
+    comp["texn2"].setUav(pTexn2->getUAV(0));
+    comp["csCb"]["rel"] = relg;
     comp["csCb"]["res"] = resolution;
     comp["csCb"]["boundingBox"] = boundingBox;
     comp.allocateStructuredBuffer("x0", 108, x0.data(), sizeof(float) * 108);
@@ -133,10 +141,15 @@ std::vector<Texture::SharedPtr> RenderProgram3DG1::generateTexture(RenderContext
     posdata.assign(dataptr, dataptr + resolution * resolution * resolution);
     comp.unmapBuffer("posdata");
 
+   /* for (int i = 0; i < resolution * resolution * resolution; i++) {
+        if (posdata[i].z == 0)
+            std::cout << data2[i].x << " " << data2[i].y << " " << data2[i].z << std::endl;
+    }*/
+
     std::vector<Texture::SharedPtr> textures;
     textures.push_back(pTexfp);
     textures.push_back(pTexn);
-    textures.push_back(pTexn);
+    textures.push_back(pTexn2);
 
     return textures;
 }

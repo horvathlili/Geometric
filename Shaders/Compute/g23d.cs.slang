@@ -48,7 +48,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     fp = pos - map(pos) * n;
 
   int s = 0;
-    while (abs(map(fp)) > 0.0001 && s < 40)
+    while (abs(map(fp)) > 0.00001 && s < 40)
     {
         n = getNormal(fp);
         fp = fp - n * map(fp);
@@ -115,14 +115,26 @@ void main(uint3 threadId : SV_DispatchThreadID)
        
                 h = map(pp_i);
         
-                if (abs(h) < 0.00001 || h > 2)
+                if (abs(h) < 0.001 || t > boundingBox)
                     break;
                 
                 t += h;
             }
             
             pp_i = r.p + t * r.v;
+
+            /*if (t > boundingBox || i >= 100 || length(pp_i - fp) > 2 *boundingBox / (float) res)
+            {
+
+                pp_i = pp_i = r.p + map(pp_i) * r.v;
+            }*/
+            
             n_i = getNormal(pp_i);
+
+            /*if (dot((pos - pp_i)*is, n_i) < 0)
+            {
+                n_i *= -1;
+            }*/
             
             //converting to local base
             float3 localp = float3(dot(pp_i - fp, b1), dot(pp_i - fp, b2), dot(pp_i - fp, n));
@@ -182,7 +194,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
   
     texfpr[threadId.xyz] = float4(fp, r);
     data1[datai] = float4(fp, r);
-    texdR[threadId.xyz] = float4(d,R);
+    texdR[threadId.xyz] = float4(d, R);
     data2[datai] = float4(d, R);
     texn[threadId.xyz] = float4(n, is);
     data3[datai] = float4(n, 1);

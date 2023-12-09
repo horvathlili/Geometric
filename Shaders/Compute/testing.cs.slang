@@ -46,16 +46,30 @@ void main(uint2 threadId : SV_DispatchThreadID)
         float3 pos = getQueryPoint(float3(threadId.xy, i));
         error = abs(map(pos) - filter(pos));
 
-       // if (map(pos )<0)
-         //  error = 0;
+        float3 fp, n;
 
-        float3 uvw = ((pos) / float3(boundingBox) + 0.5) * (res);
+        n = getNormal(pos);
+        fp = pos - map(pos) * n;
 
-    
+   
+  
+        int s = 0;
+        while (abs(map(fp)) > 0.01 && s < 40)
+        {
+            n = getNormal(fp);
+            fp = fp - n * map(fp);
+            s++;
+        }
 
-        float4 t1 = texture1[uvw];
-        
+        int is = map(pos) < 0 ? -1 : 1;
+
+        error = abs(is * length(fp - pos) - filter(pos));
+
+       // if (is <0)
+         //   error = 0;
+
         seconderror += (error * error);
+
         
         
         firsterror += error;
@@ -63,11 +77,12 @@ void main(uint2 threadId : SV_DispatchThreadID)
         if (error > inferror)
         {
             inferror = error;
-           
-            //firsterrors[threadId.x * testres + threadId.y] = filter(t1.xyz);
-            //checkerrors[threadId.x * testres + threadId.y] = t1.z;
+
+         
         }
     }
+
+    float4 pp = texture1[float3(threadId.xy, 0)];
     
     
     seconderrors[threadId.x * testres + threadId.y] = seconderror;

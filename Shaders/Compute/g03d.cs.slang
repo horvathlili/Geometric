@@ -11,6 +11,7 @@ cbuffer csCb
     int sdf;
     int res;
     float boundingBox;
+    float rel;
 };
 
 
@@ -25,11 +26,27 @@ void main(uint3 threadId : SV_DispatchThreadID)
     pos.y += (float) boundingBox / (float) res * (threadId.y + 0.5);
     pos.z += (float) boundingBox / (float) res * (threadId.z + 0.5);
 
-    
+
+    float3 fp, n;
+
+    n = getNormal(pos);
+    fp = pos - map(pos) * n;
+
+   
+  
+    int s = 0;
+    while (abs(map(fp)) > 0.001 && s < 40)
+    {
+        n = getNormal(fp);
+        fp = fp - n * map(fp);
+        s++;
+    }
+
+    int is = map(pos) < 0 ? -1 : 1;
     
     int datai = threadId.x * res * res + threadId.y * res + threadId.z;
      
-    texfp[threadId.xyz] = float4(map(pos), getNormal(pos));
-    data1[datai] = float4(map(pos), getNormal(pos));
+    texfp[threadId.xyz] = float4( length(fp - pos) * is/*map(pos)*/, getNormal(pos));
+    data1[datai] = float4(length(fp - pos) * is, getNormal(pos));
     posdata[datai] = float4(threadId.xyz, 1);
 }

@@ -94,8 +94,9 @@ PsOut main(psIn input) : SV_TARGET
     PsOut o;
 
     float2 pp = (input.pixelpos.xy- float2(0.25,0.1)) * float2(2, 1.125);
+  
     float d = filter(pp);
-    int a = (d > 0) ? 0 : 1;
+    int a = (d > 0) ? 1 : 0;
     if (abs(pp.x) >= 1 || abs(pp.y) >= 1 || pp.y < 0 || pp.x<0) 
     {
         o.col = float4(1, 1, 1, 1);
@@ -113,7 +114,7 @@ PsOut main(psIn input) : SV_TARGET
         {
             float2 ppos = (pp - 0.5) * boundingBox;
           o.col =debug1(a,d);
-            o.col = float4(float3(map(ppos) - filter(pp))*10, 1);
+         //   o.col = float4(float3(map(ppos) - filter(pp))*10, 1);
 
         }
 

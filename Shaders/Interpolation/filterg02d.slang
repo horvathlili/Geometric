@@ -23,9 +23,11 @@ float noInterp(float2 p)
 float bilinear(float2 p)
 {
 
-    int2 uv = p * (res-1);
-    float2 pos = (p - 0.5) * 2 * float2(4, 2.25);
-    float2 ab = (p * (res - 1) - uv);
+    float2 fuv = clamp(p * (float(res)) - 0.5, 0, float(res) - 1);
+    int2 uv = clamp(fuv, 0, res - 2);
+    float2 pos = (p - 0.5) * boundingBox;
+    float2 ab = (fuv - uv);
+    
     
     float d1 = texture1[uv].x;
    
