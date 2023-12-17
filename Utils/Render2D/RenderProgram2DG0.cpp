@@ -10,6 +10,7 @@ RenderProgram2DG0::RenderProgram2DG0() {
     field = 0;
 
     bn = 1;
+  
 
 }
 
@@ -41,6 +42,8 @@ void RenderProgram2DG0::renderGui(Gui::Window* w) {
     if (w->button(originalsdf ? "show original" : "hide original")) {
         originalsdf = !originalsdf;
     }
+
+   // w->image("texture", msdf);
 }
 
 
@@ -58,6 +61,12 @@ std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext
     pTex = Texture::create2D(resolution, resolution,format , 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
     generateFont(ft);
+
+    msdf = Texture::createFromFile("C:\\tdk\\Falcor\\Source\\Samples\\GeometricFields\\render.png", true, true);
+   
+    if (msdf == nullptr) {
+        std::cout << "null" << std::endl;
+    }
 
     auto& comp = *ComputeProgram;
 
@@ -89,6 +98,7 @@ std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext
     textures.push_back(pTex);
     textures.push_back(pTex);
 
+    
     return textures;
 }
 

@@ -61,10 +61,15 @@ void RenderProgram2D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
             mpSampler = Sampler::create(desc);
         }
 
+      
+
         Vars["texture1"] = textures[0];
         Vars["texture2"] = textures[1];
         Vars["textureCSG"] = textures[2];
+        Vars["msdftexture"] = msdf;
         Vars["psCb"]["res"] = resolution;
+        Vars["psCb"]["bit"] = bit;
+        Vars["psCb"]["fpmax"] = fpmax;
         Vars["psCb"]["debug"] = debugging;
         Vars["psCb"]["originalsdf"] = originalsdf;
         Vars["psCb"]["dx"] = dx;

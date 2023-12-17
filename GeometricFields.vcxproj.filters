@@ -50,6 +50,9 @@
     <ClCompile Include="FreetypeUtils\OutlineBuffer.cpp">
       <Filter>Freetype utils</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\Render2D\RenderProgram2Dmsdf.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeometricFields.h" />
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="FreetypeUtils\OutlineBuffer.h">
       <Filter>Freetype utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Render2D\RenderProgram2Dmsdf.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -249,5 +255,11 @@
     <ShaderSource Include="isocahedron.slang">
       <Filter>Shaders\SDF</Filter>
     </ShaderSource>
+    <ShaderSource Include="Shaders\Interpolation\filtermsdf.slang">
+      <Filter>Shaders\Interpolation</Filter>
+    </ShaderSource>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="output.png" />
   </ItemGroup>
 </Project>

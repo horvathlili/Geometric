@@ -22,6 +22,7 @@
     <ClCompile Include="Utils\ComputeProgramWrapper.cpp" />
     <ClCompile Include="Utils\Render2D\RenderProgram2DG0.cpp" />
     <ClCompile Include="Utils\Render2D\RenderProgram2DG1.cpp" />
+    <ClCompile Include="Utils\Render2D\RenderProgram2Dmsdf.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3D.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3DG0.cpp" />
     <ClCompile Include="Utils\Render3D\RenderProgram3DG1.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="Utils\ComputeProgramWrapper.h" />
     <ClInclude Include="Utils\Render2D\RenderProgram2DG0.h" />
     <ClInclude Include="Utils\Render2D\RenderProgram2DG1.h" />
+    <ClInclude Include="Utils\Render2D\RenderProgram2Dmsdf.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3D.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3DG0.h" />
     <ClInclude Include="Utils\Render3D\RenderProgram3DG1.h" />
@@ -82,6 +84,7 @@
     <ShaderSource Include="Shaders\Interpolation\filterg03d.slang" />
     <ShaderSource Include="Shaders\Interpolation\filterg13d.slang" />
     <ShaderSource Include="Shaders\Interpolation\filterg23d.slang" />
+    <ShaderSource Include="Shaders\Interpolation\filtermsdf.slang" />
     <ShaderSource Include="Shaders\SDF\head.slang" />
     <ShaderSource Include="Shaders\SDF\knob.slang" />
     <ShaderSource Include="Shaders\SDF\sdf2d.slang" />
@@ -95,6 +98,11 @@
     <ShaderSource Include="Shaders\Utils\spheretrace.slang" />
     <ShaderSource Include="testing2d.cs.slang" />
     <ShaderSource Include="tiefighter.slang" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="output.png">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </Image>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65BCD11B-FC56-4F3D-9976-084933AF4187}</ProjectGuid>
@@ -130,6 +138,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\tdk\Falcor\Source\Samples\GeometricFields\FreeType\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\tdk\Falcor\Source\Samples\GeometricFields\FreeType\debug static\vs2015-2022\win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

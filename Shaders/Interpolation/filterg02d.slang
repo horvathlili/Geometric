@@ -14,6 +14,8 @@ float noInterp(float2 p)
 
     float4 t1 = texture1[uv];
 
+
+
  
     return t1.x;
 }

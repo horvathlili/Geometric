@@ -11,6 +11,9 @@ protected:
     enum SDF2d { circle, moon, star, horseshoe,font };
     uint sdf2d = SDF2d::circle;
 
+    int bit = 16;
+
+    float fpmax;
 
     std::string ft = "x";
     //gui
@@ -43,6 +46,8 @@ protected:
 
     OutlineBuffer ob;
     std::string fontf = "FreetypeUtils/Assets/wmanimals2.ttf";
+
+    Texture::SharedPtr msdf;
     
 
 public:

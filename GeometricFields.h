@@ -6,7 +6,7 @@
 #include "Utils/Render3D/RenderProgram3DG1.h"
 #include "Utils/Render3D/RenderProgram3DG2.h"
 #include "Utils/Render3D/RenderProgram3DG0.h"
-
+#include "Utils/Render2D/RenderProgram2Dmsdf.h"
 
 using namespace Falcor;
 
@@ -26,13 +26,14 @@ private:
 
 
     //mező típusa
-    enum Field { g02d, g12d, g03d, g13d, g23d };
+    enum Field { g02d, g12d, msdf2d, g03d, g13d, g23d };
     uint field = Field::g12d;
 
 
     //program objects
     RenderProgram2DG0 program2DG0;
     RenderProgram2DG1 program2DG1;
+    RenderProgram2Dmsdf program2Dmsdf;
     RenderProgram3DG1 program3DG1;
     RenderProgram3DG2 program3DG2;
     RenderProgram3DG0 program3DG0;

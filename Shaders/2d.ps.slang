@@ -88,6 +88,25 @@ float4 debug1(float a,float d)
 }
     
 */
+float3 inter(float2 pos)
+{
+    int l = (int) floor(pos.x);
+    int b = (int) floor(pos.y);
+    int r = l + 1;
+    int t = b + 1;
+    double lr = pos.x - l;
+    double bt = pos.y - b;
+    l = clamp(l,0, 32 - 1), r = clamp(r,0, 32 - 1);
+    b = clamp(b,0,32 - 1), t = clamp(t,0, 32 - 1);
+ 
+
+    return lerp(lerp(msdftexture[l][b], msdftexture[r][b], lr), lerp(msdftexture[l][t], msdftexture[r][t], lr), bt);
+
+}
+float median(float r, float g, float b)
+{
+    return max(min(r, g), min(max(r, g), b));
+}
 
 PsOut main(psIn input) : SV_TARGET
 {
@@ -96,19 +115,22 @@ PsOut main(psIn input) : SV_TARGET
     float2 pp = (input.pixelpos.xy- float2(0.25,0.1)) * float2(2, 1.125);
   
     float d = filter(pp);
+
     int a = (d > 0) ? 1 : 0;
+
+    a = (float) (d > 0);
     if (abs(pp.x) >= 1 || abs(pp.y) >= 1 || pp.y < 0 || pp.x<0) 
     {
         o.col = float4(1, 1, 1, 1);
+
+       
+      
     }
     else
     {
-       // float d = filter(pp);
-        o.col = float4(a, a, a, 1);
-        
-    
+        o.col = float4(a,a,a, 1);
 
-    
+       
 
         if (debug)
         {

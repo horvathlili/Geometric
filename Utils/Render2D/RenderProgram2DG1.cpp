@@ -73,23 +73,28 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
 
     Texture::SharedPtr pTexCSG = nullptr;
 
-    ResourceFormat format = ResourceFormat::RGBA16Float;
+    bit = 32;
 
+    ResourceFormat format = ResourceFormat::RGBA16Float;
     if (texturesize == 1) {
         format = ResourceFormat::RGBA32Float;
     }
+  
 
     pTex = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
     pTex2 = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
-    pTexCSG = Texture::create2D(resolution-1, resolution-1, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+    pTexCSG = Texture::create2D(resolution-1, resolution-1, ResourceFormat::RGBA16Float, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
     generateFont(ft);
 
     auto& comp = *ComputeProgram;
 
+    std::cout << bit << std::endl;
+
     comp["tex"].setUav(pTex->getUAV(0));
     comp["tex2"].setUav(pTex2->getUAV(0));
     comp["csCb"]["res"] = resolution;
+    comp["csCb"]["bit"] = bit;
     comp["csCb"]["boundingBox"] = boundingBox;
     comp.getProgram()->addDefine("SDF", std::to_string(sdf2d));
     comp.allocateStructuredBuffer("data1", resolution * resolution);
@@ -116,20 +121,53 @@ std::vector<Texture::SharedPtr> RenderProgram2DG1::generateTexture(RenderContext
     posdata.assign(dataptr, dataptr + resolution * resolution);
     comp.unmapBuffer("posdata");
 
-    std::vector<Texture::SharedPtr> textures;
-    textures.push_back(pTex);
-    textures.push_back(pTex2);
+   
+
+    fpmax = 0;
+    for (int i = 0; i < resolution * resolution; i++) {
+        if (abs(data2[i].x) > fpmax)
+            fpmax = abs(data2[i].x);
+        if (abs(data2[i].y) > fpmax)
+            fpmax = abs(data2[i].y);
+    }
+
+    std::cout << fpmax << std::endl;
 
     //calculating csg trees
 
     auto& comp2 = *CSGProgram;
 
+    Texture::SharedPtr pTex8;
+    format = ResourceFormat::R11G11B10Float;
+    pTex8 = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
+
+    if (texturesize == 2) {
+        bit = 8;
+    }
+
     comp2["texcsg"].setUav(pTexCSG->getUAV(0));
-    comp2["texture2"] = textures[1];
+    comp2["tex8"].setUav(pTex8->getUAV(0));
+    comp2["texture2"] = pTex2;
     comp2["csCb"]["res"] = resolution;
+    comp2["csCb"]["bit"] = bit;
+    comp2["csCb"]["max"] = fpmax;
     comp2["csCb"]["boundingBox"] = boundingBox;
 
-    comp2.runProgram(pRenderContext, resolution-1, resolution-1);
+    comp2.runProgram(pRenderContext, resolution, resolution);
+
+
+    std::vector<Texture::SharedPtr> textures;
+    textures.push_back(pTex);
+    
+
+    if (bit == 8) {
+        textures.push_back(pTex8);
+    }
+    else {
+        textures.push_back(pTex2);
+    }
+
+  
 
     textures.push_back(pTexCSG);
     return textures;

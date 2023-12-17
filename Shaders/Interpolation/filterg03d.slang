@@ -11,6 +11,8 @@ float noInterp(float3 pos)
 
     float4 t1 = texture1.SampleLevel(mSampler, uvw, 0);
 
+
+   
    
     return t1.x;
 }

@@ -5,7 +5,7 @@ class RenderProgram2DG1 : public RenderProgram2D {
 
 private:
    
-
+   
    
     std::vector<Texture::SharedPtr> generateTexture(RenderContext* pRenderContext) override;
 

@@ -6,7 +6,10 @@ void RenderProgram::setVao(Buffer::SharedPtr vbo, Vao::SharedPtr vao) {
 }
 
 void RenderProgram::setupGui() {
-
+    Gui::RadioButton tex8;
+    tex8.label = "8 bit";
+    tex8.buttonID = 2;
+    tex8.sameLine = true;
     Gui::RadioButton tex16;
     tex16.label = "16 bit";
     tex16.buttonID = 0;
@@ -15,6 +18,7 @@ void RenderProgram::setupGui() {
     tex32.label = "32 bit";
     tex32.buttonID = 1;
     tex32.sameLine = true;
+    bg_texsize.push_back(tex8);
     bg_texsize.push_back(tex16);
     bg_texsize.push_back(tex32);
 

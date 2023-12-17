@@ -3,9 +3,57 @@
 #endif
 
 static float2 fps[4];
-static float2 ns[4];
+static float ns[4];
 
+float2 fpfrom8bit(float2 fp)
+{
+    float2 fp1 = 2.f*fpmax * (fp - 0.5);
+    return fp1;
+}
+float nfrom8bit(float n)
+{
+    float n1 = 4 * (n - 0.5);
+    return n1;
+}
 
+float2 getn(float2 fp, float2 uv)
+{
+    float2 fp = texture2[uv].xy;
+    float n = texture2[uv].z;
+
+    if (bit == 8)
+    {
+    
+        fp = fpfrom8bit(fp);
+        n = nfrom8bit(n);
+    }
+
+    float2 t = float2(-boundingBox / 2.0) + (uv + 0.5f) * boundingBox / (float2) res;
+
+    float2 nn = t - fp;
+
+    if (n < 0)
+    {
+        nn *= -1;
+    }
+
+    return nn;
+}
+
+float2 getn2(float2 fp, float n, float2 uv)
+{
+  
+    float2 t = float2(-boundingBox / 2.0) + (uv + 0.5f) * boundingBox / (float2) res;
+
+    float2 nn = t - fp;
+
+    if (n < 0)
+    {
+        nn *= -1;
+    }
+
+    return nn;
+}
 
 float sdLine(float2 p, float2 fp, float2 n)
 {
@@ -20,32 +68,44 @@ float noInterp(float2 p)
     int2 uv = p * (res);
 
     float2 fp = texture2[uv].xy;
-    float2 n = texture2[uv].zw;
-   
+    float n = texture2[uv].z;
+
+    if (bit == 8)
+    {
+        n = nfrom8bit(n);
+        fp = fpfrom8bit(fp);
+    }
+
+    float2 nn = getn2(fp, n,uv);
+
+    
 
     float2 pp = (p - 0.5) *boundingBox;
 
-   
-    if (length(n) > 10)
-    {
-       
-        if (n.x == -10)
-            return -length(pp - fp);
-        return length(pp - fp);
-
-       
-    }
-
-    return sdLine(pp, fp, normalize(n));
+    return sdLine(pp, fp, normalize(nn));
 }
 
 
-float csgDist(float2 pp, int uv)
+float csgDist(float2 pp, int i, int2 uv )
 {
-    float2 fp = fps[uv].xy;
-    float2 n = ns[uv].xy;
+    float2 fp = fps[i].xy;
+    float n = ns[i];
+
+    float2 nn;
+    
+    if (bit == 8)
+    {
+    
+        fp = fpfrom8bit(fp);
+        n = nfrom8bit(n);
+
+    }
+
+    nn = getn2(fp,n, uv);
+    
+   
   
-    return sdLine(pp, fp, normalize(n));    
+    return sdLine(pp, fp, normalize(nn));    
 }
 
 float bilinear(float2 p)
@@ -57,18 +117,45 @@ float bilinear(float2 p)
     float2 ab = (fuv - uv);
     
     float2 fp, n;
+    float nn;
     fp = texture2[uv].xy;
-    n = normalize(texture2[uv].zw);
-    float d1 = sdLine(pos, fp, n);
+    nn = texture2[uv].z;
+    if (bit == 8)
+    {
+        fp = fpfrom8bit(fp);
+        nn = nfrom8bit(nn);
+    }
+    n = getn2(fp, nn, uv);
+    float d1 = sdLine(pos, fp, normalize(n));
     fp = texture2[uv + float2(1, 0)].xy;
-    n = normalize(texture2[uv + float2(1, 0)].zw);
-    float d2 = sdLine(pos, fp, n);;
+    nn = texture2[uv + float2(1, 0)].z;
+    if (bit == 8)
+    {
+        fp = fpfrom8bit(fp);
+        nn = nfrom8bit(nn);
+    }
+    n = getn2(fp, nn, uv + float2(1, 0));
+    float d2 = sdLine(pos, fp, normalize(n));;
     fp = texture2[uv + float2(0, 1)].xy;
-    n = normalize(texture2[uv + float2(0, 1)].zw);
-    float d3 = sdLine(pos, fp, n);;
+    nn = texture2[uv + float2(0, 1)].z;
+    if (bit == 8)
+    {
+        fp = fpfrom8bit(fp);
+        nn = nfrom8bit(nn);
+    }
+    n = getn2(fp, nn, uv + float2(0, 1));
+    float d3 = sdLine(pos, fp, normalize(n));;
     fp = texture2[uv + float2(1, 1)].xy;
-    n = normalize(texture2[uv + float2(1, 1)].zw);
-    float d4 = sdLine(pos, fp, n);;
+    nn = texture2[uv + float2(1, 1)].z;
+    if (bit == 8)
+    {
+        fp = fpfrom8bit(fp);
+        nn = nfrom8bit(nn);
+    }
+    n = getn2(fp, nn, uv + float2(1, 1));
+    float d4 = sdLine(pos, fp, normalize(n));;
+
+    
 
     float d11 = lerp(d1, d2, ab.x);
     float d22 = lerp(d3, d4, ab.x);
@@ -88,16 +175,16 @@ float csg(float2 p,bool points)
     float2 ab = (fuv - uv);
 
     fps[0] = texture2[uv].xy;
-    ns[0] = texture2[uv].zw;
+    ns[0] = texture2[uv].z;
    
     fps[1] = texture2[uv + float2(1, 0)].xy;
-    ns[1] = texture2[uv + float2(1, 0)].zw;
+    ns[1] = texture2[uv + float2(1, 0)].z;
    
     fps[2] = texture2[uv + float2(1, 1)].xy;
-    ns[2] = texture2[uv + float2(1, 1)].zw;
+    ns[2] = texture2[uv + float2(1, 1)].z;
    
     fps[3] = texture2[uv + float2(0, 1)].xy;
-    ns[3] = texture2[uv + float2(0, 1)].zw;
+    ns[3] = texture2[uv + float2(0, 1)].z;
 
    
    
@@ -117,7 +204,7 @@ float csg(float2 p,bool points)
 
     for (int i = 0; i < 4; i++)
     {
-        cd[i] = csgDist(pos, i);
+        cd[i] = csgDist(pos, i,uvs[i]);
     }
 
    
@@ -229,26 +316,26 @@ float csg(float2 p,bool points)
             }
         }
 
-        d1 = min(csgDist(pos, u1), csgDist(pos, u2));
-        d2 = max(csgDist(pos, i1), csgDist(pos, i2));
+        d1 = min(cd[ u1], cd[ u2]);
+        d2 = max(cd[ i1], cd[ i2]);
                
         
         result = min(d1, d2);
 
         if (c[i1%2 + 4] == 0)
         {
-            d1 = max(min(csgDist(pos, u1), csgDist(pos, i2)), csgDist(pos, i1));
+            d1 = max(min(cd[ u1], cd[ i2]), cd[ i1]);
 
-            result = min(d1, csgDist(pos, u2));
+            result = min(d1, cd[ u2]);
 
           // return 1;
         }
 
         if (c[i2%2 + 4] == 0)
         {
-            d1 = max(max(csgDist(pos, i1), csgDist(pos, u2)), csgDist(pos, i2));
+            d1 = max(max(cd[ i1], cd[ u2]), cd[ i2]);
 
-            result = min(d1, csgDist(pos, u1));
+            result = min(d1, cd[ u1]);
 
             //return 1;
         }
@@ -265,7 +352,7 @@ float csg(float2 p,bool points)
 
         for (int i = 0; i <4; i++)
         {
-            d = min(csgDist(pos, i), d);
+            d = min(cd[ i], d);
         }
         //return 0;
 
@@ -282,7 +369,7 @@ float csg(float2 p,bool points)
 
         for (int i = 0; i < 4; i++)
         {
-            d = max(csgDist(pos, i), d);
+            d = max(cd[ i], d);
         }
 
 
@@ -327,7 +414,7 @@ float debugplane(float2 pp,float2 p, int i)
     
     //float2 uvs[4] = { uv + float2(0, 0), uv + float2(1, 0), uv + float2(0, 1), uv + float2(1, 1) };
 
-    fps[0] = texture2[uv].xy;
+    /*fps[0] = texture2[uv].xy;
     ns[0] = texture2[uv].zw;
    
     fps[1] = texture2[uv + float2(1, 0)].xy;
@@ -340,9 +427,10 @@ float debugplane(float2 pp,float2 p, int i)
     ns[3] = texture2[uv + float2(0, 1)].zw;
     
     float2 fp = fps[i].xy;
-    float2 n = ns[i];
-  
-    return sdLine(pos, fp, normalize(n)) < 0 ? 1 : 0;
+    float2 n = ns[i];*/
+
+    return 0;
+    //return sdLine(pos, fp, normalize(n)) < 0 ? 1 : 0;
 
    
 }

@@ -31,11 +31,16 @@ void GeometricFields::setUpGui() {
     g02d.label = "G0 (2D)";
     g02d.buttonID = Field::g02d;
     g02d.sameLine = true;
+    Gui::RadioButton msdf2d;
+    msdf2d.label = "msdf (2D)";
+    msdf2d.buttonID = Field::msdf2d;
+    msdf2d.sameLine = true;
     bg_field.push_back(g23d);
     bg_field.push_back(g12d);
     bg_field.push_back(g13d);
     bg_field.push_back(g03d);
     bg_field.push_back(g02d);
+    bg_field.push_back(msdf2d);
  
 }
 
@@ -66,6 +71,7 @@ void GeometricFields::initPlane() {
     FALCOR_ASSERT(pVao);
 
     program2DG0.setVao(pVbo, pVao);
+    program2Dmsdf.setVao(pVbo, pVao);
     program2DG1.setVao(pVbo, pVao);
     program3DG1.setVao(pVbo, pVao);
     program3DG2.setVao(pVbo, pVao);
@@ -171,6 +177,9 @@ void GeometricFields::onGuiRender(Gui* pGui)
     if (field == Field::g12d) {
         program2DG1.renderGui(&w);
     }
+    if (field == Field::msdf2d) {
+        program2Dmsdf.renderGui(&w);
+    }
     if (field == Field::g13d) {
         program3DG1.renderGui(&w);    
     } 
@@ -255,6 +264,9 @@ void GeometricFields::onFrameRender(RenderContext* pRenderContext, const Fbo::Sh
     }
     if (field == Field::g12d) {
         program2DG1.Render(pRenderContext, pTargetFbo);
+    }
+    if (field == Field::msdf2d) {
+        program2Dmsdf.Render(pRenderContext, pTargetFbo);
     }
     if (field == Field::g13d) {
         program3DG1.Render(pRenderContext, pTargetFbo);
