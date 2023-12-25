@@ -116,7 +116,7 @@ PsOut main(psIn input) : SV_TARGET
   
     float d = filter(pp);
 
-    int a = (d > 0) ? 1 : 0;
+    int a = (d > 0) ? 1 : -1;
 
     a = (float) (d > 0);
     if (abs(pp.x) >= 1 || abs(pp.y) >= 1 || pp.y < 0 || pp.x<0) 

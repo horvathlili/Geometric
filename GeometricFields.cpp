@@ -209,6 +209,9 @@ void GeometricFields::onGuiRender(Gui* pGui)
   if (field == Field::g03d) {
       program3DG0.testGui(&w);
   }
+  if (field == Field::msdf2d) {
+      program2Dmsdf.testGui(&w);
+  }
 
   Gui::Window f(pGui, "File", { 350, 150 }, { 700, 170 });
   if (field == Field::g02d) {

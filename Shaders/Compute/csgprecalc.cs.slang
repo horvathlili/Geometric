@@ -14,16 +14,6 @@ cbuffer csCb
     float boundingBox;
 };
 
-float2 fpfrom8bit(float2 fp)
-{
-    float2 fp1 = boundingBox * (fp - 0.5);
-    return fp1;
-}
-float nfrom8bit(float n)
-{
-    float n1 = 4 * (n - 0.5);
-    return n1;
-}
 
 float2 getn2(float2 fp, float n, float2 uv)
 {

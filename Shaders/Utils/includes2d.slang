@@ -32,5 +32,6 @@ Texture2D texture1;
 Texture2D texture2;
 Texture2D textureCSG;
 Texture2D msdftexture;
+Texture2D osdftexture;
 
 SamplerState mSampler;

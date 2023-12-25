@@ -8,6 +8,7 @@ static float ns[4];
 float2 fpfrom8bit(float2 fp)
 {
     float2 fp1 = 2.f*fpmax * (fp - 0.5);
+ 
     return fp1;
 }
 float nfrom8bit(float n)

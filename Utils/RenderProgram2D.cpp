@@ -67,6 +67,7 @@ void RenderProgram2D::Render(RenderContext* pRenderContext, const Fbo::SharedPtr
         Vars["texture2"] = textures[1];
         Vars["textureCSG"] = textures[2];
         Vars["msdftexture"] = msdf;
+        Vars["osdftexture"] = osdf;
         Vars["psCb"]["res"] = resolution;
         Vars["psCb"]["bit"] = bit;
         Vars["psCb"]["fpmax"] = fpmax;
@@ -99,11 +100,13 @@ void RenderProgram2D::testing(RenderContext* pRenderContext) {
         mpSampler = Sampler::create(desc);
     }
 
-    testres = 217;
+
     comp["csCb"]["testres"] = testres;
     comp["texture1"] = textures[0];
     comp["texture2"] = textures[1];
     comp["textureCSG"] = textures[2];
+    comp["msdftexture"] = msdf;
+    comp["osdftexture"] = osdf;
     comp["psCb"]["boundingBox"] = boundingBox;
     comp["psCb"]["res"] = resolution;
     comp["mSampler"] = mpSampler;
@@ -113,6 +116,7 @@ void RenderProgram2D::testing(RenderContext* pRenderContext) {
     comp.allocateStructuredBuffer("seconderrors", testres * testres);
     comp.allocateStructuredBuffer("firsterrors", testres * testres);
     comp.allocateStructuredBuffer("inferrors", testres * testres);
+    comp.allocateStructuredBuffer("pixerrors", testres * testres);
     comp.allocateStructuredBuffer("segments", (int)ob.contours.size(), ob.contours.data(), sizeof(int) * (int)ob.contours.size());
     comp.allocateStructuredBuffer("controlPoints", (int)ob.controlPoints.size(), ob.controlPoints.data(), sizeof(float) * (int)ob.controlPoints.size());
     std::vector<int> v; v.push_back(ob.contourNumber);
@@ -133,10 +137,15 @@ void RenderProgram2D::testing(RenderContext* pRenderContext) {
     inferror.resize(testres * testres);
     inferror.assign(dataptri, dataptri + testres * testres);
     comp.unmapBuffer("inferrors");
+    auto dataptrp = comp.mapBuffer<const float>("pixerrors");
+    pixerror.resize(testres * testres);
+    pixerror.assign(dataptrp, dataptrp + testres * testres);
+    comp.unmapBuffer("pixerrors");
 
     secondnorm = 0;
     firstnorm = 0;
     infnorm = 0;
+    pixnorm = 0;
 
     for (int i = 0; i < testres * testres; i++) {
 
@@ -146,8 +155,11 @@ void RenderProgram2D::testing(RenderContext* pRenderContext) {
         if (inferror[i] > infnorm) {
             infnorm = inferror[i];
         }
+
+        pixnorm += pixerror[i];
     }
 
+    pixnorm = pixnorm / (float)(testres * testres);
     secondnorm = sqrt(secondnorm);
 
 
@@ -218,6 +230,7 @@ void RenderProgram2D::testGui(Gui::Window* t) {
     t->text("second norm: " + std::to_string(secondnorm));
     t->text("first norm: " + std::to_string(firstnorm));
     t->text("inf norm: " + std::to_string(infnorm));
+    t->text("pixel error: " + std::to_string(pixnorm));
 
 
 }

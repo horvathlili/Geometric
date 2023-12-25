@@ -28,9 +28,11 @@ protected:
     std::vector<float> seconderror;
     std::vector<float> firsterror;
     std::vector<float> inferror;
+    std::vector<float> pixerror;
     float secondnorm = 0;
     float firstnorm = 0;
     float infnorm = 0;
+    float pixnorm = 0;
     bool csgrun = false;
 
     void testing(RenderContext* pRenderContext);
@@ -48,6 +50,7 @@ protected:
     std::string fontf = "FreetypeUtils/Assets/wmanimals2.ttf";
 
     Texture::SharedPtr msdf;
+    Texture::SharedPtr osdf;
     
 
 public:

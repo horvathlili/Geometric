@@ -62,8 +62,9 @@ std::vector<Texture::SharedPtr> RenderProgram2DG0::generateTexture(RenderContext
 
     generateFont(ft);
 
-    msdf = Texture::createFromFile("C:\\tdk\\Falcor\\Source\\Samples\\GeometricFields\\render.png", true, true);
-   
+  
+    
+
     if (msdf == nullptr) {
         std::cout << "null" << std::endl;
     }

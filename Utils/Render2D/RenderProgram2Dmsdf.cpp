@@ -56,8 +56,9 @@ std::vector<Texture::SharedPtr> RenderProgram2Dmsdf::generateTexture(RenderConte
     pTex = Texture::create2D(resolution, resolution, format, 1, 1, nullptr, ResourceBindFlags::ShaderResource | ResourceBindFlags::UnorderedAccess);
 
    
-
-    msdf = Texture::createFromFile("C:\\tdk\\Falcor\\Source\\Samples\\GeometricFields\\render32.tiff", true, true);
+    generateFont(ft);
+    msdf = Texture::createFromFile("C:\\tdk\\Falcor\\Source\\Samples\\GeometricFields\\render128.tiff", true, true);
+    osdf = Texture::createFromFile("C:\\tdk\\Falcor\\Source\\Samples\\GeometricFields\\renderexact.tiff", true, true);
 
     std::cout << "msdf" << std::endl;
 
