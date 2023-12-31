@@ -1,7 +1,7 @@
 #include "../SDF/sdf2d.slang"
 
-RWTexture2D<float3> tex;
-RWTexture2D<float3> tex2;
+RWTexture2D<float4> tex;
+RWTexture2D<float4> tex2;
 
 RWStructuredBuffer<float4> data1;
 RWStructuredBuffer<float4> data2;
@@ -81,10 +81,12 @@ void main(uint2 threadId : SV_DispatchThreadID)
 
     float2 fp = getFootpoint(t);
     float2 fpo = fp;
-    
-    float2 nn[49];
-    float2 tp[49];
 
+    if (sdLine(t, fp, n) * map(t) < 0)
+    {
+        n *= -1;
+    }
+    
     int inside = 0;
     int outside = 0;
 
@@ -92,11 +94,7 @@ void main(uint2 threadId : SV_DispatchThreadID)
     {
         for (int j = -3; j <= 3; j++)
         {
-            float2 tt = t + float2(i, j) * 1 / 6.0f * boundingBox / (float2) res*0.5;
             float2 fp2 = fp + float2(i, j) * 1 / 6.0f * boundingBox / (float2) res * 0.01;
-            
-            nn[(i + 3) * 7 + j + 3] = getNormal(tt);
-            tp[(i + 3) * 7 + j + 3] = getFootpoint(tt);
 
             
 
@@ -114,29 +112,31 @@ void main(uint2 threadId : SV_DispatchThreadID)
 
     n = normalize(n);
 
-    float no = map(t) < 0 ? -1 : 1;
+    //float no = map(t) < 0 ? -1 : 1;
+
+    float2 no = n;
     
     //belső sarok
     if (inside > outside)
         no *= 2;
 
-    if (bit == 8)
+   /* if (bit == 8)
     {
        // fpo = fpto8bit(fpo);
        // no = nto8bit(no);
 
-    }
+    }*/
     
-    tex[threadId.xy] = float3(fp, no);
+  //  tex[threadId.xy] = float4(fp, no);
     
-    tex2[threadId.xy] = float3(fpo, no);
+    tex2[threadId.xy] = float4(map(t), 0, no);
     
     int datai = threadId.x * res + threadId.y;
 
     
     
     data1[datai] = float4(fp, n);
-    data2[datai] = float4(fpo, no,0);
+    data2[datai] = float4(map(t), 0, no);
     posdata[datai] = float4(threadId.xy, 0, 0);
     
 }

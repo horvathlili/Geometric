@@ -160,8 +160,8 @@ void RenderProgram2D::testing(RenderContext* pRenderContext) {
     }
 
     pixnorm = pixnorm / (float)(testres * testres);
-    secondnorm = sqrt(secondnorm);
-
+    secondnorm = sqrt(secondnorm / (float)(testres * testres));
+    firstnorm = firstnorm / (float)(testres * testres);
 
 }
 

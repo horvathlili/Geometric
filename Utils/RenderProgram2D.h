@@ -47,7 +47,7 @@ protected:
    
 
     OutlineBuffer ob;
-    std::string fontf = "FreetypeUtils/Assets/wmanimals2.ttf";
+    std::string fontf = "Assets/wmanimals2.ttf";
 
     Texture::SharedPtr msdf;
     Texture::SharedPtr osdf;
